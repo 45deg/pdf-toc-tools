@@ -95,7 +95,7 @@ export function LandingPage() {
         {/* Header */}
         <div className="flex flex-col items-center gap-3 px-4 pt-8 pb-2 text-center sm:px-8 sm:pt-10">
           <div className="flex size-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10">
-            <img src="/logo.svg" alt="pdf-toc-tools Logo" className="size-12" />
+            <img src="./logo.svg" alt="pdf-toc-tools Logo" className="size-12" />
           </div>
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
