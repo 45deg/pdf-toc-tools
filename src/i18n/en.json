@@ -1,0 +1,140 @@
+{
+  "landing": {
+    "title": "TOC Editor",
+    "description": "Visually add, edit, and reorder PDF bookmarks and table of contents",
+    "tocEditor": {
+      "title": "TOC Editor",
+      "description": "Edit bookmarks (Document Outline) in JSON format. Click 'Apply' to update the PDF's bookmark structure.",
+      "unapplied": "Unapplied",
+      "exportJson": "Export JSON",
+      "exportCsv": "Export CSV",
+      "exportMarkdown": "Export Markdown",
+      "import": "Import",
+      "apply": "Apply",
+      "reset": "Reset",
+      "errorJson": "Invalid JSON format"
+    },
+    "pageOperations": {
+      "title": "Page Operations",
+      "description": "Drag & drop to reorder, delete, and extract pages"
+    },
+    "splitMerge": {
+      "title": "Split & Merge",
+      "description": "Merge multiple PDFs or batch split at specified pages"
+    },
+    "metadata": {
+      "title": "Edit Metadata",
+      "description": "Freely modify PDF metadata such as title and author"
+    },
+    "hero": {
+      "title": "PDF TOC Editor",
+      "subtitle": "Complete PDF bookmark editing, page operations, splitting, and merging entirely in your browser"
+    },
+    "dropzone": {
+      "dropHere": "Drop here",
+      "dragText": "Drag & drop PDF files",
+      "clickText": "Or click to select files",
+      "drop": "Drop",
+      "addPdf": "+ Add PDF"
+    },
+    "footer": {
+      "privacy": "All processing is completed within your browser. Files are never sent to any server."
+    }
+  },
+  "toolbar": {
+    "pages": "Pages",
+    "split": "Batch Split",
+    "metadata": "Metadata",
+    "download": {
+      "label": "Download",
+      "selected": "Download ({{count}}p selected)",
+      "total": "Download ({{count}}p)",
+      "combined": "Download ({{pages}}p / {{files}} files combined)",
+      "processing": "Processing..."
+    },
+    "openSidebar": "Open Sidebar"
+  },
+  "split": {
+    "title": "Batch Split",
+    "description": "Split based on bookmark hierarchy, or by specifying page ranges.",
+    "selectFile": "Select a file",
+    "modes": {
+      "outline": "Split by Bookmarks",
+      "range": "Split by Page Range"
+    },
+    "outlineLevel": "Split Hierarchy Level",
+    "sectionList": "Section List ({{selected}}/{{total}})",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "downloadLabel": "Split and Download {{count}} Sections",
+    "noOutline": "This file has no bookmarks.",
+    "rangeLabel": "Page Range (e.g., 1-5, 10-15, 20)",
+    "totalPages": "Total Pages: {{count}}",
+    "download": "Split and Download",
+    "processing": "Processing..."
+  },
+  "thumbnail": {
+    "ariaLabel": "Select page {{page}}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "close": "Close",
+    "noFileSelected": "Select a file"
+  },
+  "errors": {
+    "notPdf": "Not a PDF file",
+    "loadFailed": "Failed to load the file",
+    "loadFailedMany": "Failed to load {{count}} files"
+  },
+  "metadata": {
+    "title": "Metadata",
+    "unapplied": "Unapplied",
+    "description": "View and edit the Document Information Dictionary. Use 'Sanitize' to remove all creator information at once.",
+    "fields": {
+      "title": "Title",
+      "author": "Author",
+      "subject": "Subject",
+      "keywords": "Keywords",
+      "creator": "Application",
+      "producer": "PDF Producer",
+      "creationDate": "Creation Date",
+      "modificationDate": "Modification Date"
+    },
+    "actions": {
+      "apply": "Apply",
+      "reset": "Reset",
+      "applyAndDownload": "Apply and Download",
+      "sanitize": "Sanitize"
+    },
+    "noFile": "Select a file"
+  },
+  "sidebar": {
+    "navigation": "Navigation",
+    "files": "Files",
+    "outline": "Outline",
+    "clearFilter": "Clear Filter",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "noOutline": "No bookmarks",
+    "selectFile": "Select a file",
+    "downloadSection": "Download '{{title}}'",
+    "closeAria": "Close Sidebar"
+  },
+  "pageGrid": {
+    "noFile": "Select a file",
+    "loadError": "Failed to load the PDF",
+    "filterIndicator": "{{count}} Pages (p.{{start}}–p.{{end}})",
+    "clearFilter": "Clear Filter",
+    "selectionBar": {
+      "selected": "{{count}} / {{total}} pages selected",
+      "rangeSelect": "Shift+Click: Select Range",
+      "selectAll": "{{modKey}}A: Select All",
+      "delete": "⌫: Delete",
+      "moveUp": "Move Up",
+      "moveDown": "Move Down",
+      "deleteAction": "Delete",
+      "deselect": "Deselect"
+    }
+  }
+}

@@ -3,9 +3,11 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { PdfStoreProvider, usePdfStore } from "@/hooks/use-pdf-store"
 import { LoadErrorAlert } from "@/components/load-error-alert"
+import "@/i18n/config" // Import i18n config for tests
+import en from "@/i18n/en.json"
 
-// LoadErrorAlert は usePdfStore の loadErrors をもとに表示するため、
-// テスト用にストアの状態を操作するヘルパーコンポーネントを用意する。
+// LoadErrorAlert displays based on loadErrors in usePdfStore.
+// Provide a helper component to manipulate state for testing.
 
 function ErrorTrigger({
   errors,
@@ -17,9 +19,8 @@ function ErrorTrigger({
     <button
       data-testid="trigger"
       onClick={() => {
-        // loadFiles を直接呼ばず、非 PDF ファイルを渡してエラーを発生させる代わりに
-        // 内部の dispatch を模倣するため loadFiles にダミーファイルを渡す
-        // → 実際にはストアの actions を通じて loadFiles を呼ぶテストとする
+        // Mocking dispatch internally by calling loadFiles with dummy files
+        // or directly setting state if actions were available.
       }}
     >
       trigger
@@ -27,7 +28,7 @@ function ErrorTrigger({
   )
 }
 
-// テスト用に loadErrors をセットできるラッパー
+// Test harness to wrap component with provider
 function TestHarness({
   triggerLoadFiles,
   files,
@@ -57,14 +58,14 @@ function renderWithProvider(ui: React.ReactElement) {
 }
 
 describe("LoadErrorAlert", () => {
-  it("エラーがない場合は何も表示しない", () => {
+  it("should show nothing when there are no errors", () => {
     renderWithProvider(<LoadErrorAlert />)
     expect(
-      screen.queryByText("ファイルを読み込めませんでした")
+      screen.queryByText("errors.loadFailed")
     ).not.toBeInTheDocument()
   })
 
-  it("非PDFファイルをロードするとエラーアラートが表示される", async () => {
+  it("should show error alert when loading non-PDF files", async () => {
     const user = userEvent.setup()
     const txtFile = new File(["hello"], "readme.txt", { type: "text/plain" })
 
@@ -78,13 +79,13 @@ describe("LoadErrorAlert", () => {
     await user.click(screen.getByTestId("load"))
 
     expect(
-      await screen.findByText("ファイルを読み込めませんでした")
+      await screen.findByText("errors.loadFailed")
     ).toBeInTheDocument()
     expect(screen.getByText("readme.txt")).toBeInTheDocument()
-    expect(screen.getByText("PDFファイルではありません")).toBeInTheDocument()
+    expect(screen.getByText("errors.notPdf")).toBeInTheDocument()
   })
 
-  it("複数ファイルのエラー時に件数が表示される", async () => {
+  it("should show count when multiple files fail to load", async () => {
     const user = userEvent.setup()
     const files = [
       new File(["a"], "a.txt", { type: "text/plain" }),
@@ -101,13 +102,13 @@ describe("LoadErrorAlert", () => {
     await user.click(screen.getByTestId("load"))
 
     expect(
-      await screen.findByText("2件のファイルを読み込めませんでした")
+      await screen.findByText("errors.loadFailedMany")
     ).toBeInTheDocument()
     expect(screen.getByText("a.txt")).toBeInTheDocument()
     expect(screen.getByText("b.doc")).toBeInTheDocument()
   })
 
-  it("閉じるボタンでエラーがクリアされる", async () => {
+  it("should clear errors when clicking the close button", async () => {
     const user = userEvent.setup()
     const txtFile = new File(["hello"], "readme.txt", { type: "text/plain" })
 
@@ -120,19 +121,19 @@ describe("LoadErrorAlert", () => {
 
     await user.click(screen.getByTestId("load"))
     expect(
-      await screen.findByText("ファイルを読み込めませんでした")
+      await screen.findByText("errors.loadFailed")
     ).toBeInTheDocument()
 
-    await user.click(screen.getByText("閉じる"))
+    await user.click(screen.getByText("common.close"))
 
     expect(
-      screen.queryByText("ファイルを読み込めませんでした")
+      screen.queryByText("errors.loadFailed")
     ).not.toBeInTheDocument()
   })
 })
 
 describe("usePdfStore loadErrors", () => {
-  it("初期状態で loadErrors は空配列", () => {
+  it("should have empty loadErrors by default", () => {
     const { result } = require("@testing-library/react").renderHook(
       () => usePdfStore(),
       {
@@ -144,7 +145,7 @@ describe("usePdfStore loadErrors", () => {
     expect(result.current.state.loadErrors).toEqual([])
   })
 
-  it("clearLoadErrors でエラーがクリアされる", async () => {
+  it("should clear errors with clearLoadErrors", async () => {
     const { renderHook, act } = require("@testing-library/react")
     const { result } = renderHook(() => usePdfStore(), {
       wrapper: ({ children }: { children: React.ReactNode }) => (
@@ -152,14 +153,14 @@ describe("usePdfStore loadErrors", () => {
       ),
     })
 
-    // 非PDFファイルをロードしてエラーを発生させる
+    // Load non-PDF file to trigger error
     const txtFile = new File(["hello"], "test.txt", { type: "text/plain" })
     await act(async () => {
       await result.current.actions.loadFiles([txtFile])
     })
     expect(result.current.state.loadErrors).toHaveLength(1)
 
-    // クリア
+    // Clear
     act(() => {
       result.current.actions.clearLoadErrors()
     })

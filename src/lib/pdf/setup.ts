@@ -5,7 +5,7 @@ let initialized = false
 const version = pdfjsLib.version
 const cdnBase = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}`
 
-/** pdfjs-dist の getDocument に渡す共通オプション */
+/** Common options to pass to getDocument of pdfjs-dist */
 export const pdfjsDocumentOptions = {
   cMapUrl: `${cdnBase}/cmaps/`,
   cMapPacked: true,

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react"
 import { PdfStoreProvider } from "@/hooks/use-pdf-store"
 import { PdfToolkit } from "@/components/pdf-toolkit"
 
-// 重いコンポーネントをモック
+// Mock heavy components
 vi.mock("@/components/sidebar", () => ({
   Sidebar: () => <div data-testid="sidebar">Sidebar</div>,
 }))
@@ -38,9 +38,9 @@ function renderWithProvider(ui: React.ReactElement) {
 }
 
 describe("PdfToolkit", () => {
-  it("ファイルが無い場合はLandingPageを表示する", () => {
+  it("renders LandingPage when no files are present", () => {
     renderWithProvider(<PdfToolkit />)
-    // LandingPage はモックされていないので、そのコンテンツが表示される
-    expect(screen.getByText("PDF TOC Tools")).toBeInTheDocument()
+    // LandingPage is not mocked, so its content is displayed
+    expect(screen.getByText("landing.hero.title")).toBeInTheDocument()
   })
 })

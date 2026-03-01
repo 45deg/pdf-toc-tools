@@ -2,10 +2,10 @@ import { PDFDocument } from "pdf-lib"
 import type { OutlineNode, SplitResult } from "./types"
 import { writeOutlinesToPdf } from "./outline-writer"
 
-// ---------- 分割 ----------
+// ---------- Split ----------
 
 /**
- * ページ範囲指定でPDFを分割する
+ * Splits PDF by specified page ranges
  */
 export async function splitByPageRanges(
   data: ArrayBuffer,
@@ -24,7 +24,7 @@ export async function splitByPageRanges(
 }
 
 /**
- * しおりの階層レベルに基づいてPDFを章ごとに分割する
+ * Splits PDF into chapters based on outline hierarchy levels
  */
 export async function splitByOutline(
   data: ArrayBuffer,
@@ -62,11 +62,11 @@ function getNodesAtLevel(
   )
 }
 
-// ---------- 結合 ----------
+// ---------- Merge ----------
 
 /**
- * 複数PDFを結合し、しおりのページオフセットを自動調整する
- * pageOrder が指定されている場合はそのページ順序を適用してから結合する
+ * Merges multiple PDFs and auto-adjusts outline page offsets.
+ * If pageOrder is provided, that order is applied before merging.
  */
 export async function mergePdfs(
   files: { name: string; data: ArrayBuffer; outline: OutlineNode[]; pageOrder?: number[] }[]
@@ -81,7 +81,7 @@ export async function mergePdfs(
     const copiedPages = await mergedDoc.copyPages(srcDoc, indices)
     for (const page of copiedPages) mergedDoc.addPage(page)
 
-    // pageOrder に基づいてアウトラインのページインデックスを再マッピング
+    // Remap outline page indices based on pageOrder
     const pageMapping = new Map<number, number>()
     indices.forEach((origIdx, newIdx) => {
       pageMapping.set(origIdx, newIdx)
@@ -102,7 +102,7 @@ export async function mergePdfs(
 }
 
 /**
- * ページ順序の変更に伴い、アウトラインのpageIndexを再マッピングする
+ * Remaps outline pageIndex following page order changes
  */
 function remapOutlinePageIndices(
   nodes: OutlineNode[],
@@ -129,10 +129,10 @@ function adjustOutlinePageIndices(
   }))
 }
 
-// ---------- ページ操作 ----------
+// ---------- Page Operations ----------
 
 /**
- * 指定した順序でページを並び替えた新しいPDFを生成する
+ * Creates a new PDF with pages reordered according to the specified order
  */
 export async function createPdfWithPageOrder(
   data: ArrayBuffer,
@@ -145,10 +145,10 @@ export async function createPdfWithPageOrder(
   return newDoc.save()
 }
 
-// ---------- メタデータ ----------
+// ---------- Metadata ----------
 
 /**
- * PDFのメタデータを更新する
+ * Updates PDF metadata
  */
 export async function updatePdfMetadata(
   data: ArrayBuffer,
@@ -174,10 +174,10 @@ export async function updatePdfMetadata(
   return pdfDoc.save()
 }
 
-// ---------- しおり適用 ----------
+// ---------- Applying Outlines ----------
 
 /**
- * しおりツリーをPDFに適用する
+ * Applies outline tree to PDF
  */
 export async function applyOutlinesToPdf(
   data: ArrayBuffer,
@@ -188,7 +188,7 @@ export async function applyOutlinesToPdf(
   return pdfDoc.save()
 }
 
-// ---------- ヘルパー ----------
+// ---------- Helpers ----------
 
 function sanitizeFilename(name: string): string {
   return name.replace(/[<>:"/\\|?*]/g, "_").trim() || "untitled"

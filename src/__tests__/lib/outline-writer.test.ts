@@ -12,9 +12,9 @@ async function createTestPdf(pageCount: number): Promise<PDFDocument> {
 }
 
 describe("writeOutlinesToPdf", () => {
-  it("空のしおりで Outlines エントリを削除する", async () => {
+  it("removes Outlines entry with empty outlines", async () => {
     const doc = await createTestPdf(3)
-    // まず書き込んでから削除
+    // Write first then remove
     writeOutlinesToPdf(doc, [
       { title: "Test", pageIndex: 0, children: [] },
     ])
@@ -24,7 +24,7 @@ describe("writeOutlinesToPdf", () => {
     expect(doc.catalog.has(PDFName.of("Outlines"))).toBe(false)
   })
 
-  it("フラットなしおりを書き込む", async () => {
+  it("writes flat outlines", async () => {
     const doc = await createTestPdf(5)
     const outline: OutlineNode[] = [
       { title: "First", pageIndex: 0, children: [] },
@@ -34,13 +34,13 @@ describe("writeOutlinesToPdf", () => {
     writeOutlinesToPdf(doc, outline)
     expect(doc.catalog.has(PDFName.of("Outlines"))).toBe(true)
 
-    // PDFを保存・再読み込みして有効であることを確認
+    // Save/reload PDF to verify it remains valid
     const data = await doc.save()
     const reloaded = await PDFDocument.load(data)
     expect(reloaded.getPageCount()).toBe(5)
   })
 
-  it("ネストしたしおりを書き込む", async () => {
+  it("writes nested outlines", async () => {
     const doc = await createTestPdf(10)
     const outline: OutlineNode[] = [
       {
@@ -71,13 +71,13 @@ describe("writeOutlinesToPdf", () => {
     expect(reloaded.getPageCount()).toBe(10)
   })
 
-  it("pageIndex が範囲外の場合はクランプされる", async () => {
+  it("clamps pageIndex if it is out of range", async () => {
     const doc = await createTestPdf(3)
     const outline: OutlineNode[] = [
       { title: "Over", pageIndex: 100, children: [] },
       { title: "Under", pageIndex: -5, children: [] },
     ]
-    // エラーを投げずに実行できること
+    // Should execute without throwing errors
     writeOutlinesToPdf(doc, outline)
     const data = await doc.save()
     const reloaded = await PDFDocument.load(data)

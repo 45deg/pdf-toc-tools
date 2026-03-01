@@ -1,8 +1,9 @@
 import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import App from "@/App"
+import "@/i18n/config"
 
-// 重いコンポーネントをモック
+// Mock heavy components
 vi.mock("@/components/sidebar", () => ({
   Sidebar: () => <div data-testid="sidebar">Sidebar</div>,
 }))
@@ -12,14 +13,14 @@ vi.mock("@/components/page-grid", () => ({
 }))
 
 describe("App", () => {
-  it("クラッシュせずにレンダリングされる", () => {
+  it("should render without crashing", () => {
     render(<App />)
-    // LandingPageが表示される（ファイル未読み込み時）
-    expect(screen.getByText("PDF TOC Tools")).toBeInTheDocument()
+    // LandingPage should be displayed (when no files are loaded)
+    expect(screen.getByText("landing.hero.title")).toBeInTheDocument()
   })
 
-  it("PdfStoreProviderがラップされている", () => {
-    // App内でusePdfStoreが使えることの確認（エラーが出なければOK）
+  it("should be wrapped with PdfStoreProvider", () => {
+    // Confirm usePdfStore can be used within App (no errors should occur)
     const { container } = render(<App />)
     expect(container).toBeTruthy()
   })

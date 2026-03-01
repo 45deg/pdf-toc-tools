@@ -8,32 +8,32 @@ function renderWithProvider(ui: React.ReactElement) {
 }
 
 describe("FileDropZone", () => {
-  describe("インラインモード（デフォルト）", () => {
-    it("デフォルトテキストを表示する", () => {
+  describe("Inline mode (default)", () => {
+    it("renders default text", () => {
       renderWithProvider(<FileDropZone />)
-      expect(screen.getByText("+ PDF追加")).toBeInTheDocument()
+      expect(screen.getByText("landing.dropzone.addPdf")).toBeInTheDocument()
     })
 
-    it("file input 要素が存在する", () => {
+    it("has a file input element", () => {
       renderWithProvider(<FileDropZone />)
       const input = document.querySelector('input[type="file"]')
       expect(input).toBeTruthy()
     })
   })
 
-  describe("フルページモード", () => {
-    it("フルスクリーンテキストを表示する", () => {
+  describe("Full page mode", () => {
+    it("renders full screen text", () => {
       renderWithProvider(<FileDropZone fullPage />)
       expect(
-        screen.getByText("PDFファイルをドラッグ＆ドロップ")
+        screen.getByText("landing.dropzone.dragText")
       ).toBeInTheDocument()
       expect(
-        screen.getByText("またはクリックしてファイルを選択")
+        screen.getByText("landing.dropzone.clickText")
       ).toBeInTheDocument()
     })
   })
 
-  it("カスタムclassNameを適用できる", () => {
+  it("can apply a custom className", () => {
     const { container } = renderWithProvider(
       <FileDropZone className="custom-class" />
     )

@@ -9,7 +9,7 @@ import {
 } from "@/lib/pdf/operations"
 import type { OutlineNode } from "@/lib/pdf/types"
 
-// テスト用のPDFを作成するヘルパー
+// Helper to create a PDF for testing
 async function createTestPdf(pageCount: number): Promise<ArrayBuffer> {
   const doc = await PDFDocument.create()
   for (let i = 0; i < pageCount; i++) {
@@ -20,7 +20,7 @@ async function createTestPdf(pageCount: number): Promise<ArrayBuffer> {
 }
 
 describe("splitByPageRanges", () => {
-  it("1つの範囲で分割する", async () => {
+  it("splits by a single range", async () => {
     const data = await createTestPdf(5)
     const results = await splitByPageRanges(data, [
       { label: "part1", pages: [0, 1, 2] },
@@ -28,12 +28,12 @@ describe("splitByPageRanges", () => {
     expect(results).toHaveLength(1)
     expect(results[0].label).toBe("part1")
 
-    // 分割結果のPDFを検証
+    // Verify the split PDF result
     const splitDoc = await PDFDocument.load(results[0].data)
     expect(splitDoc.getPageCount()).toBe(3)
   })
 
-  it("複数の範囲で分割する", async () => {
+  it("splits by multiple ranges", async () => {
     const data = await createTestPdf(10)
     const results = await splitByPageRanges(data, [
       { label: "first", pages: [0, 1, 2] },
@@ -49,7 +49,7 @@ describe("splitByPageRanges", () => {
     expect(doc2.getPageCount()).toBe(5)
   })
 
-  it("空の ranges で空配列を返す", async () => {
+  it("returns an empty array for empty ranges", async () => {
     const data = await createTestPdf(3)
     const results = await splitByPageRanges(data, [])
     expect(results).toEqual([])
@@ -57,21 +57,21 @@ describe("splitByPageRanges", () => {
 })
 
 describe("createPdfWithPageOrder", () => {
-  it("ページ順序通りのPDFを生成する", async () => {
+  it("generates a PDF with the specified page order", async () => {
     const data = await createTestPdf(5)
     const result = await createPdfWithPageOrder(data, [4, 3, 2, 1, 0])
     const doc = await PDFDocument.load(result)
     expect(doc.getPageCount()).toBe(5)
   })
 
-  it("一部のページのみを抽出する", async () => {
+  it("extracts only a subset of pages", async () => {
     const data = await createTestPdf(10)
     const result = await createPdfWithPageOrder(data, [0, 5, 9])
     const doc = await PDFDocument.load(result)
     expect(doc.getPageCount()).toBe(3)
   })
 
-  it("同じページを複数回含めることができる", async () => {
+  it("allows including the same page multiple times", async () => {
     const data = await createTestPdf(3)
     const result = await createPdfWithPageOrder(data, [0, 0, 1, 1, 2, 2])
     const doc = await PDFDocument.load(result)
@@ -80,7 +80,7 @@ describe("createPdfWithPageOrder", () => {
 })
 
 describe("updatePdfMetadata", () => {
-  it("タイトルと著者を更新する", async () => {
+  it("updates title and author", async () => {
     const data = await createTestPdf(1)
     const result = await updatePdfMetadata(data, {
       title: "Test Title",
@@ -91,7 +91,7 @@ describe("updatePdfMetadata", () => {
     expect(doc.getAuthor()).toBe("Test Author")
   })
 
-  it("すべてのメタデータフィールドを更新する", async () => {
+  it("updates all metadata fields", async () => {
     const data = await createTestPdf(1)
     const result = await updatePdfMetadata(data, {
       title: "My PDF",
@@ -105,18 +105,18 @@ describe("updatePdfMetadata", () => {
     expect(doc.getTitle()).toBe("My PDF")
     expect(doc.getAuthor()).toBe("Author")
     expect(doc.getSubject()).toBe("Subject")
-    // pdf-lib の setKeywords はカンマ区切り→配列にしてスペース区切りで保存する
+    // pdf-lib's setKeywords saves it as a space-separated string from a comma-separated one
     expect(doc.getKeywords()).toBe("key1 key2 key3")
     expect(doc.getCreator()).toBe("Creator App")
-    // pdf-lib は save() 時に Producer を自動的に上書きする
+    // pdf-lib automatically overwrites Producer during save()
     expect(doc.getProducer()).toContain("pdf-lib")
   })
 
-  it("undefined のフィールドは更新しない", async () => {
+  it("does not update undefined fields", async () => {
     const data = await createTestPdf(1)
-    // まずタイトルを設定
+    // Set title first
     const withTitle = await updatePdfMetadata(data, { title: "Original" })
-    // 著者のみ更新
+    // Update only author
     const result = await updatePdfMetadata(
       withTitle.buffer.slice(withTitle.byteOffset, withTitle.byteOffset + withTitle.byteLength),
       { author: "New Author" }
@@ -128,26 +128,26 @@ describe("updatePdfMetadata", () => {
 })
 
 describe("applyOutlinesToPdf", () => {
-  it("しおりをPDFに適用して有効なPDFを返す", async () => {
+  it("applies outlines to the PDF and returns a valid PDF", async () => {
     const data = await createTestPdf(5)
     const outline: OutlineNode[] = [
       { title: "Chapter 1", pageIndex: 0, children: [] },
       { title: "Chapter 2", pageIndex: 3, children: [] },
     ]
     const result = await applyOutlinesToPdf(data, outline)
-    // 有効なPDFであることを確認
+    // Verify it is a valid PDF
     const doc = await PDFDocument.load(result)
     expect(doc.getPageCount()).toBe(5)
   })
 
-  it("空のしおりを適用できる", async () => {
+  it("can apply empty outlines", async () => {
     const data = await createTestPdf(3)
     const result = await applyOutlinesToPdf(data, [])
     const doc = await PDFDocument.load(result)
     expect(doc.getPageCount()).toBe(3)
   })
 
-  it("ネストしたしおりを適用できる", async () => {
+  it("can apply nested outlines", async () => {
     const data = await createTestPdf(10)
     const outline: OutlineNode[] = [
       {
@@ -171,7 +171,7 @@ describe("applyOutlinesToPdf", () => {
 })
 
 describe("mergePdfs", () => {
-  it("2つのPDFを結合する", async () => {
+  it("merges two PDFs", async () => {
     const data1 = await createTestPdf(3)
     const data2 = await createTestPdf(2)
     const result = await mergePdfs([
@@ -185,7 +185,7 @@ describe("mergePdfs", () => {
     expect(result.outline[1].title).toBe("file2")
   })
 
-  it("結合時にしおりのオフセットが正しく調整される", async () => {
+  it("correctly adjusts outline offsets during merging", async () => {
     const data1 = await createTestPdf(3)
     const data2 = await createTestPdf(5)
     const outline1: OutlineNode[] = [
@@ -198,13 +198,13 @@ describe("mergePdfs", () => {
       { name: "a.pdf", data: data1, outline: outline1 },
       { name: "b.pdf", data: data2, outline: outline2 },
     ])
-    // ファイル2のしおりのオフセットが+3されている
+    // File 2's outline offset is adjusted by +3
     expect(result.outline[0].pageIndex).toBe(0) // file1 starts at 0
     expect(result.outline[1].pageIndex).toBe(3) // file2 starts at 3
     expect(result.outline[1].children[0].pageIndex).toBe(3)
   })
 
-  it("pageOrder を指定して結合する", async () => {
+  it("merges with customized pageOrder", async () => {
     const data = await createTestPdf(5)
     const result = await mergePdfs([
       { name: "a.pdf", data: data, outline: [], pageOrder: [0, 2, 4] },

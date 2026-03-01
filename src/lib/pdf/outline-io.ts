@@ -1,13 +1,13 @@
 import type { OutlineNode } from "./types"
 
-// ===== エクスポート =====
+// ===== Export =====
 
-/** しおりをJSON文字列にエクスポート */
+/** Exports outline to JSON string */
 export function exportOutlineAsJson(outline: OutlineNode[]): string {
   return JSON.stringify(outline, null, 2)
 }
 
-/** しおりをCSV文字列にエクスポート（フラット化） */
+/** Exports outline to CSV string (flattened) */
 export function exportOutlineAsCsv(outline: OutlineNode[]): string {
   const rows: string[] = ["level,title,page"]
   function flatten(nodes: OutlineNode[], level: number) {
@@ -21,7 +21,7 @@ export function exportOutlineAsCsv(outline: OutlineNode[]): string {
   return rows.join("\n")
 }
 
-/** しおりをMarkdown形式にエクスポート */
+/** Exports outline to Markdown format */
 export function exportOutlineAsMarkdown(outline: OutlineNode[]): string {
   const lines: string[] = []
   function walk(nodes: OutlineNode[], depth: number) {
@@ -35,22 +35,22 @@ export function exportOutlineAsMarkdown(outline: OutlineNode[]): string {
   return lines.join("\n")
 }
 
-// ===== インポート =====
+// ===== Import =====
 
-/** JSON文字列からしおりをインポート */
+/** Imports outline from JSON string */
 export function importOutlineFromJson(json: string): OutlineNode[] {
   const parsed = JSON.parse(json)
   return validateOutlineNodes(parsed)
 }
 
-/** CSV文字列からしおりをインポート */
+/** Imports outline from CSV string */
 export function importOutlineFromCsv(csv: string): OutlineNode[] {
   const lines = csv
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
 
-  // ヘッダー行をスキップ
+  // Skip header row
   const dataLines =
     lines[0]?.toLowerCase().startsWith("level") ? lines.slice(1) : lines
 
@@ -70,7 +70,7 @@ export function importOutlineFromCsv(csv: string): OutlineNode[] {
     return {
       level: parseInt(match[1], 10),
       title,
-      pageIndex: parseInt(match[3], 10) - 1, // CSVは1-indexed
+      pageIndex: parseInt(match[3], 10) - 1, // CSV is 1-indexed
     }
   })
 

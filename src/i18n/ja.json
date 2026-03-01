@@ -1,0 +1,140 @@
+{
+  "landing": {
+    "title": "TOC Editor",
+    "description": "PDFのしおり・目次を視覚的に追加・編集・並べ替え",
+    "tocEditor": {
+      "title": "TOCエディタ",
+      "description": "しおり（Document Outline）をJSON形式で編集できます。変更を「適用」すると、PDFのしおり構造が更新されます。",
+      "unapplied": "未適用",
+      "exportJson": "JSONエクスポート",
+      "exportCsv": "CSVエクスポート",
+      "exportMarkdown": "Markdownエクスポート",
+      "import": "インポート",
+      "apply": "適用",
+      "reset": "リセット",
+      "errorJson": "JSONの形式が正しくありません"
+    },
+    "pageOperations": {
+      "title": "ページ操作",
+      "description": "ドラッグ＆ドロップでページの並べ替え・削除・抽出"
+    },
+    "splitMerge": {
+      "title": "分割・結合",
+      "description": "複数PDFの結合や、指定ページでの一括分割に対応"
+    },
+    "metadata": {
+      "title": "メタデータ編集",
+      "description": "タイトル・著者などのPDFメタデータを自由に変更"
+    },
+    "hero": {
+      "title": "PDF TOC Editor",
+      "subtitle": "PDFの目次編集・ページ操作・分割結合をブラウザ上で完結"
+    },
+    "footer": {
+      "privacy": "すべての処理はブラウザ上で完結します。ファイルがサーバーに送信されることはありません。"
+    },
+    "dropzone": {
+      "dropHere": "ここにドロップしてください",
+      "dragText": "PDFファイルをドラッグ＆ドロップ",
+      "clickText": "またはクリックしてファイルを選択",
+      "drop": "ドロップ",
+      "addPdf": "+ PDF追加"
+    }
+  },
+  "toolbar": {
+    "pages": "ページ",
+    "split": "一括分割",
+    "metadata": "メタデータ",
+    "download": {
+      "label": "ダウンロード",
+      "selected": "ダウンロード（{{count}}p選択中）",
+      "total": "ダウンロード（{{count}}p）",
+      "combined": "ダウンロード（{{pages}}p／{{files}}ファイル結合）",
+      "processing": "処理中…"
+    },
+    "openSidebar": "サイドバーを開く"
+  },
+  "split": {
+    "title": "一括分割",
+    "description": "しおりの階層に基づく分割、またはページ範囲指定による分割が可能です。",
+    "selectFile": "ファイルを選択してください",
+    "modes": {
+      "outline": "しおりで分割",
+      "range": "ページ範囲で分割"
+    },
+    "outlineLevel": "分割する階層レベル",
+    "sectionList": "セクション一覧（{{selected}}/{{total}}）",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて解除",
+    "downloadLabel": "{{count}}セクションを分割してダウンロード",
+    "noOutline": "このファイルにはしおりがありません。",
+    "rangeLabel": "ページ範囲（例: 1-5, 10-15, 20）",
+    "totalPages": "総ページ数: {{count}}",
+    "download": "分割してダウンロード",
+    "processing": "処理中…"
+  },
+  "thumbnail": {
+    "ariaLabel": "ページ {{page}} を選択"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "close": "閉じる",
+    "noFileSelected": "ファイルを選択してください"
+  },
+  "errors": {
+    "notPdf": "PDFファイルではありません",
+    "loadFailed": "ファイルを読み込めませんでした",
+    "loadFailedMany": "{{count}}件のファイルを読み込めませんでした"
+  },
+  "metadata": {
+    "title": "メタデータ",
+    "unapplied": "未適用",
+    "description": "Document Information Dictionary の閲覧・編集。「サニタイズ」で制作者情報を一括削除できます。",
+    "fields": {
+      "title": "タイトル",
+      "author": "著者",
+      "subject": "件名",
+      "keywords": "キーワード",
+      "creator": "作成アプリ",
+      "producer": "PDF変換",
+      "creationDate": "作成日",
+      "modificationDate": "更新日"
+    },
+    "actions": {
+      "apply": "適用",
+      "reset": "リセット",
+      "applyAndDownload": "適用してダウンロード",
+      "sanitize": "サニタイズ（情報削除）"
+    },
+    "noFile": "ファイルを選択してください"
+  },
+  "pageGrid": {
+    "noFile": "ファイルを選択してください",
+    "loadError": "PDFの読み込みに失敗しました",
+    "filterIndicator": "{{count}} ページ（p.{{start}}–p.{{end}}）",
+    "clearFilter": "フィルタ解除",
+    "selectionBar": {
+      "selected": "{{count}} / {{total}} ページ選択中",
+      "rangeSelect": "Shift+クリック: 範囲選択",
+      "selectAll": "{{modKey}}A: 全選択",
+      "delete": "⌫: 削除",
+      "moveUp": "前に移動",
+      "moveDown": "後に移動",
+      "deleteAction": "削除",
+      "deselect": "選択解除"
+    }
+  },
+  "sidebar": {
+    "navigation": "ナビゲーション",
+    "files": "ファイル一覧",
+    "outline": "アウトライン",
+    "clearFilter": "フィルタ解除",
+    "expandAll": "すべて展開",
+    "collapseAll": "すべて折りたたむ",
+    "noOutline": "しおりがありません",
+    "selectFile": "ファイルを選択してください",
+    "downloadSection": "「{{title}}」をダウンロード",
+    "closeAria": "サイドバーを閉じる"
+  }
+}

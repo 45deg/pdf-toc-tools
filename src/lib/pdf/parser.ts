@@ -11,16 +11,16 @@ export interface ParseResult {
 }
 
 /**
- * PDFファイルをパースし、ページ数・しおり・メタデータを抽出する
+ * Parse PDF file to extract page count, outline, and metadata.
  */
 export async function parsePdf(data: ArrayBuffer): Promise<ParseResult> {
-  // pdfjs-dist は渡された ArrayBuffer を内部で transfer/detach するためコピーを渡す
+  // pdfjs-dist transfers/detaches the passed ArrayBuffer internally, so we pass a copy.
   const pdf = await getDocument({
     data: new Uint8Array(data.slice(0)),
     ...pdfjsDocumentOptions,
   }).promise
 
-  // Outline の再帰的パース
+  // Recursive parsing of Outline
   async function processItems(items: any[]): Promise<OutlineNode[]> {
     const result: OutlineNode[] = []
     for (const item of items) {
@@ -33,7 +33,7 @@ export async function parsePdf(data: ArrayBuffer): Promise<ParseResult> {
           pageIndex = await pdf.getPageIndex(item.dest[0])
         }
       } catch {
-        /* 解決できない参照はページ0とする */
+        /* Default to page 0 if reference cannot be resolved */
       }
       result.push({
         title: item.title || "Untitled",
@@ -45,22 +45,22 @@ export async function parsePdf(data: ArrayBuffer): Promise<ParseResult> {
     return result
   }
 
-  // しおり取得
+  // Get outline
   let outline: OutlineNode[] = []
   try {
     const raw = await pdf.getOutline()
     if (raw) outline = await processItems(raw)
   } catch {
-    /* しおりが無い場合 */
+    /* If no outline is found */
   }
 
-  // メタデータ取得
+  // Get metadata
   let info: Record<string, string> = {}
   try {
     const meta = await pdf.getMetadata()
     info = (meta.info ?? {}) as Record<string, string>
   } catch {
-    /* メタデータが無い場合 */
+    /* If no metadata is found */
   }
 
   const metadata: PdfMetadata = {

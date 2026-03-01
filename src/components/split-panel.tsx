@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { useActiveFile } from "@/hooks/use-pdf-store"
 import type { OutlineNode } from "@/lib/pdf/types"
 import {
@@ -22,17 +23,18 @@ import { cn } from "@/lib/utils"
 type SplitMode = "outline" | "pages"
 
 export function SplitPanel() {
+  const { t } = useTranslation()
   const activeFile = useActiveFile()
   const [mode, setMode] = useState<SplitMode>("outline")
   const [outlineLevel, setOutlineLevel] = useState(0)
   const [pageRangesText, setPageRangesText] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
-  // チェックボックスで選択するセクション（outlineモード用）
+  // Sections to select via checkbox (for outline mode)
   const [selectedSections, setSelectedSections] = useState<Set<number>>(new Set())
 
   const hasOutline = (activeFile?.outline.length ?? 0) > 0
 
-  // アウトラインの最大深度を計算
+  // Calculate maximum depth of the outline
   const maxDepth = useMemo((): number => {
     if (!activeFile) return 0
     function getDepth(nodes: OutlineNode[], d: number): number {
@@ -42,7 +44,7 @@ export function SplitPanel() {
     return getDepth(activeFile.outline, 0)
   }, [activeFile])
 
-  // 指定レベルのノードリストを取得
+  // Get list of nodes at the specified level
   const targetNodes = useMemo((): OutlineNode[] => {
     if (!activeFile || !hasOutline) return []
     return outlineLevel === 0
@@ -50,7 +52,7 @@ export function SplitPanel() {
       : getNodesAtLevel(activeFile.outline, outlineLevel)
   }, [activeFile, hasOutline, outlineLevel])
 
-  // プレビュー用: ノードごとのページ範囲
+  // For preview: page range for each node
   const sectionPreviews = useMemo(() => {
     if (!activeFile || targetNodes.length === 0) return []
     const totalPages = activeFile.pageOrder.length
@@ -69,11 +71,11 @@ export function SplitPanel() {
     })
   }, [activeFile, targetNodes])
 
-  // レベル変更時に選択をリセット（全選択状態に）
+  // Reset selection when level changes (default to all selected)
   const handleLevelChange = useCallback(
     (level: number) => {
       setOutlineLevel(level)
-      // 新しいレベルのノードを取得して全選択
+      // Get nodes at the new level and select all
       const nodes =
         level === 0
           ? (activeFile?.outline ?? [])
@@ -83,7 +85,7 @@ export function SplitPanel() {
     [activeFile]
   )
 
-  // セクションの選択/解除
+  // Toggle selection for a section
   const toggleSection = useCallback((index: number) => {
     setSelectedSections((prev) => {
       const next = new Set(prev)
@@ -104,7 +106,7 @@ export function SplitPanel() {
     }
   }, [selectedSections.size, sectionPreviews])
 
-  // 初回マウント時に全選択
+  // Select all on initial mount
   useMemo(() => {
     if (targetNodes.length > 0 && selectedSections.size === 0) {
       setSelectedSections(new Set(targetNodes.map((_, i) => i)))
@@ -121,7 +123,7 @@ export function SplitPanel() {
         activeFile.pageOrder.length,
         outlineLevel
       )
-      // 選択されたセクションのみフィルタ
+      // Filter only selected sections
       const splits = allSplits.filter((_, i) => selectedSections.has(i))
       if (splits.length === 0) return
       if (splits.length === 1) {
@@ -168,7 +170,7 @@ export function SplitPanel() {
   if (!activeFile) {
     return (
       <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-        ファイルを選択してください
+        {t("split.selectFile")}
       </div>
     )
   }
@@ -177,14 +179,14 @@ export function SplitPanel() {
     <div className="mx-auto flex h-full max-w-4xl flex-col gap-3 overflow-auto p-2 sm:gap-4 sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle>一括分割</CardTitle>
+          <CardTitle>{t("split.title")}</CardTitle>
           <CardDescription>
-            しおりの階層に基づく分割、またはページ範囲指定による分割が可能です。
+            {t("split.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-6">
-            {/* モード切替 */}
+            {/* Mode switch */}
             <div className="flex gap-2">
               <Button
                 variant={mode === "outline" ? "default" : "outline"}
@@ -192,23 +194,23 @@ export function SplitPanel() {
                 onClick={() => setMode("outline")}
                 disabled={!hasOutline}
               >
-                しおりで分割
+                {t("split.modes.outline")}
               </Button>
               <Button
                 variant={mode === "pages" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setMode("pages")}
               >
-                ページ範囲で分割
+                {t("split.modes.range")}
               </Button>
             </div>
 
             {mode === "outline" && hasOutline && (
               <div className="flex flex-col gap-4">
-                {/* 階層レベル選択 */}
+                {/* Outline level selection */}
                 <Field>
                   <FieldLabel htmlFor="outline-level">
-                    分割する階層レベル
+                    {t("split.outlineLevel")}
                   </FieldLabel>
                   <div className="flex gap-1">
                     {Array.from({ length: maxDepth + 1 }, (_, i) => (
@@ -228,20 +230,23 @@ export function SplitPanel() {
                   </div>
                 </Field>
 
-                {/* プレビューリスト（チェックボックス付き） */}
+                {/* Preview list with checkboxes */}
                 {sectionPreviews.length > 0 && (
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">
-                        セクション一覧（{selectedSections.size}/{sectionPreviews.length}）
+                        {t("split.sectionList", {
+                          selected: selectedSections.size,
+                          total: sectionPreviews.length,
+                        })}
                       </span>
                       <button
                         className="text-primary text-xs font-medium hover:underline"
                         onClick={toggleAll}
                       >
                         {selectedSections.size === sectionPreviews.length
-                          ? "すべて解除"
-                          : "すべて選択"}
+                          ? t("split.deselectAll")
+                          : t("split.selectAll")}
                       </button>
                     </div>
                     <div className="border-border max-h-80 overflow-auto rounded-lg border">
@@ -265,7 +270,7 @@ export function SplitPanel() {
                             {section.title}
                           </span>
                           <Badge variant="secondary" className="shrink-0 text-[10px]">
-                            p.{section.startPage + 1}–{section.endPage + 1}（{section.pageCount}p）
+                            p.{section.startPage + 1}-{section.endPage + 1} ({section.pageCount}p)
                           </Badge>
                         </label>
                       ))}
@@ -278,15 +283,15 @@ export function SplitPanel() {
                   disabled={isProcessing || selectedSections.size === 0}
                 >
                   {isProcessing
-                    ? "処理中…"
-                    : `${selectedSections.size}セクションを分割してダウンロード`}
+                    ? t("split.processing")
+                    : t("split.downloadLabel", { count: selectedSections.size })}
                 </Button>
               </div>
             )}
 
             {mode === "outline" && !hasOutline && (
               <div className="text-muted-foreground text-sm">
-                このファイルにはしおりがありません。
+                {t("split.noOutline")}
               </div>
             )}
 
@@ -294,7 +299,7 @@ export function SplitPanel() {
               <div className="flex flex-col gap-3">
                 <Field>
                   <FieldLabel htmlFor="page-ranges">
-                    ページ範囲（例: 1-5, 10-15, 20）
+                    {t("split.rangeLabel")}
                   </FieldLabel>
                   <Input
                     id="page-ranges"
@@ -304,13 +309,13 @@ export function SplitPanel() {
                   />
                 </Field>
                 <div className="text-muted-foreground text-xs">
-                  総ページ数: {activeFile.pageOrder.length}
+                  {t("split.totalPages", { count: activeFile.pageOrder.length })}
                 </div>
                 <Button
                   onClick={handleSplitByPages}
                   disabled={isProcessing || !pageRangesText.trim()}
                 >
-                  {isProcessing ? "処理中…" : "分割してダウンロード"}
+                  {isProcessing ? t("split.processing") : t("split.download")}
                 </Button>
               </div>
             )}
@@ -321,7 +326,7 @@ export function SplitPanel() {
   )
 }
 
-// ---- ヘルパー ----
+// ---- Helpers ----
 
 function getNodesAtLevel(
   nodes: OutlineNode[],
@@ -335,7 +340,7 @@ function getNodesAtLevel(
 }
 
 /**
- * "1-5, 10-15, 20" → [[0,1,2,3,4], [9,10,11,12,13,14], [19]]
+ * Parses page ranges: "1-5, 10-15, 20" -> [[0,1,2,3,4], [9,10,11,12,13,14], [19]]
  */
 function parsePageRanges(text: string, totalPages: number): number[][] {
   const ranges: number[][] = []

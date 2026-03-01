@@ -1,11 +1,11 @@
-/** PDFのしおり（Outline）ノード */
+/** PDF Outline (Bookmark) node */
 export interface OutlineNode {
   title: string
   pageIndex: number // 0-based
   children: OutlineNode[]
 }
 
-/** PDFのメタデータ */
+/** PDF Metadata */
 export interface PdfMetadata {
   title: string
   author: string
@@ -17,7 +17,7 @@ export interface PdfMetadata {
   modificationDate: string
 }
 
-/** 読み込み済みPDFファイル */
+/** Loaded PDF file */
 export interface LoadedPdf {
   id: string
   name: string
@@ -25,38 +25,38 @@ export interface LoadedPdf {
   originalPageCount: number
   outline: OutlineNode[]
   metadata: PdfMetadata
-  /** 現在の有効ページ順序（0-indexed の元ページインデックス） */
+  /** Current active page order (0-indexed original page index) */
   pageOrder: number[]
 }
 
-/** 分割結果 */
+/** Split result */
 export interface SplitResult {
   label: string
   data: Uint8Array
 }
 
-/** ビューモード */
+/** View mode */
 export type ViewMode = "pages" | "toc" | "split" | "metadata"
 
-/** アウトラインによるページフィルタ */
+/** Page filter based on outline */
 export interface OutlineFilter {
-  /** フィルタ対象の開始ページ（0-indexed, inclusive） */
+  /** Start page of the filter (0-indexed, inclusive) */
   startPage: number
-  /** フィルタ対象の終了ページ（0-indexed, inclusive） */
+  /** End page of the filter (0-indexed, inclusive) */
   endPage: number
-  /** 選択されたアウトラインノードのタイトル */
+  /** Label of the selected outline node */
   label: string
 }
 
-/** Explorer表示用ノード */
+/** Node for Explorer view */
 export interface ExplorerNode {
   type: "folder" | "page"
   label: string
-  /** ページノードの場合（0-indexed） */
+  /** For page nodes (0-indexed) */
   pageIndex?: number
   children?: ExplorerNode[]
-  /** フォルダノードの場合の開始ページ（0-indexed, inclusive） */
+  /** Start page for folder nodes (0-indexed, inclusive) */
   startPage?: number
-  /** フォルダノードの場合の終了ページ（0-indexed, inclusive） */
+  /** End page for folder nodes (0-indexed, inclusive) */
   endPage?: number
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
+import { useTranslation } from "react-i18next"
 import { useActiveFile, usePdfStore } from "@/hooks/use-pdf-store"
 import { updatePdfMetadata } from "@/lib/pdf/operations"
 import { downloadBlob } from "@/lib/pdf/download"
@@ -16,22 +17,23 @@ import {
 } from "@/components/ui/card"
 import { Field, FieldLabel } from "@/components/ui/field"
 
-const metadataFields: { key: keyof PdfMetadata; label: string; readOnly?: boolean }[] = [
-  { key: "title", label: "タイトル" },
-  { key: "author", label: "著者" },
-  { key: "subject", label: "件名" },
-  { key: "keywords", label: "キーワード" },
-  { key: "creator", label: "作成アプリ" },
-  { key: "producer", label: "PDF変換" },
-  { key: "creationDate", label: "作成日", readOnly: true },
-  { key: "modificationDate", label: "更新日", readOnly: true },
-]
-
 export function MetadataPanel() {
+  const { t } = useTranslation()
   const activeFile = useActiveFile()
   const { actions } = usePdfStore()
   const [form, setForm] = useState<PdfMetadata | null>(null)
   const [isDirty, setIsDirty] = useState(false)
+
+  const metadataFields: { key: keyof PdfMetadata; label: string; readOnly?: boolean }[] = [
+    { key: "title", label: t("metadata.fields.title") },
+    { key: "author", label: t("metadata.fields.author") },
+    { key: "subject", label: t("metadata.fields.subject") },
+    { key: "keywords", label: t("metadata.fields.keywords") },
+    { key: "creator", label: t("metadata.fields.creator") },
+    { key: "producer", label: t("metadata.fields.producer") },
+    { key: "creationDate", label: t("metadata.fields.creationDate"), readOnly: true },
+    { key: "modificationDate", label: t("metadata.fields.modificationDate"), readOnly: true },
+  ]
 
   useEffect(() => {
     if (activeFile) {
@@ -106,7 +108,7 @@ export function MetadataPanel() {
   if (!activeFile || !form) {
     return (
       <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-        ファイルを選択してください
+        {t("metadata.noFile")}
       </div>
     )
   }
@@ -116,12 +118,11 @@ export function MetadataPanel() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            メタデータ
-            {isDirty && <Badge variant="secondary">未適用</Badge>}
+            {t("metadata.title")}
+            {isDirty && <Badge variant="secondary">{t("metadata.unapplied")}</Badge>}
           </CardTitle>
           <CardDescription>
-            Document Information Dictionary の閲覧・編集。
-            「サニタイズ」で制作者情報を一括削除できます。
+            {t("metadata.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -143,20 +144,20 @@ export function MetadataPanel() {
         <CardFooter>
           <div className="flex w-full flex-wrap gap-2">
             <Button onClick={handleApply} disabled={!isDirty}>
-              適用
+              {t("metadata.actions.apply")}
             </Button>
             <Button variant="outline" onClick={handleReset} disabled={!isDirty}>
-              リセット
+              {t("metadata.actions.reset")}
             </Button>
             <Button variant="outline" onClick={handleApplyAndDownload}>
-              適用してダウンロード
+              {t("metadata.actions.applyAndDownload")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleSanitize}
               className="ml-auto"
             >
-              サニタイズ（情報削除）
+              {t("metadata.actions.sanitize")}
             </Button>
           </div>
         </CardFooter>

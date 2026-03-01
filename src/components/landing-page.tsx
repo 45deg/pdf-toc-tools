@@ -1,5 +1,6 @@
 import { useCallback } from "react"
 import { useDropzone } from "react-dropzone"
+import { useTranslation } from "react-i18next"
 import { usePdfStore } from "@/hooks/use-pdf-store"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -12,31 +13,32 @@ import {
   ShieldIcon,
 } from "@hugeicons/core-free-icons"
 
-const features = [
-  {
-    icon: ListViewIcon,
-    title: "目次（TOC）編集",
-    description: "PDFのしおり・目次を視覚的に追加・編集・並べ替え",
-  },
-  {
-    icon: GridViewIcon,
-    title: "ページ操作",
-    description: "ドラッグ＆ドロップでページの並べ替え・削除・抽出",
-  },
-  {
-    icon: SplitIcon,
-    title: "分割・結合",
-    description: "複数PDFの結合や、指定ページでの一括分割に対応",
-  },
-  {
-    icon: FileEditIcon,
-    title: "メタデータ編集",
-    description: "タイトル・著者などのPDFメタデータを自由に変更",
-  },
-]
-
 export function LandingPage() {
+  const { t } = useTranslation()
   const { state, actions } = usePdfStore()
+
+  const features = [
+    {
+      icon: ListViewIcon,
+      title: t("landing.title"),
+      description: t("landing.description"),
+    },
+    {
+      icon: GridViewIcon,
+      title: t("landing.pageOperations.title"),
+      description: t("landing.pageOperations.description"),
+    },
+    {
+      icon: SplitIcon,
+      title: t("landing.splitMerge.title"),
+      description: t("landing.splitMerge.description"),
+    },
+    {
+      icon: FileEditIcon,
+      title: t("landing.metadata.title"),
+      description: t("landing.metadata.description"),
+    },
+  ]
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -61,7 +63,7 @@ export function LandingPage() {
     >
       <input {...getInputProps()} />
 
-      {/* 背景パターン */}
+      {/* Background pattern */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage:
@@ -70,7 +72,7 @@ export function LandingPage() {
         }}
       />
 
-      {/* ドラッグ中のオーバーレイ */}
+      {/* Drag overlay */}
       {isDragActive && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-primary/5 backdrop-blur-xs">
           <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-primary bg-background/80 px-16 py-12 shadow-lg">
@@ -82,34 +84,30 @@ export function LandingPage() {
               />
             </div>
             <p className="text-lg font-semibold text-primary">
-              ここにドロップしてください
+              {t("landing.dropzone.dropHere")}
             </p>
           </div>
         </div>
       )}
 
-      {/* メインカード */}
+      {/* Main card */}
       <div className="relative z-10 flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border bg-background shadow-xl shadow-black/5 sm:rounded-3xl">
-        {/* ヘッダー */}
+        {/* Header */}
         <div className="flex flex-col items-center gap-3 px-4 pt-8 pb-2 text-center sm:px-8 sm:pt-10">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10">
-            <HugeiconsIcon
-              icon={FileIcon}
-              strokeWidth={1.5}
-              className="size-7 text-primary"
-            />
+          <div className="flex size-16 items-center justify-center overflow-hidden rounded-2xl bg-primary/10">
+            <img src="/logo.svg" alt="PDF-kit Logo" className="size-12" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              PDF TOC Tools
+            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              PDF-kit
             </h1>
             <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
-              PDFの目次編集・ページ操作・分割結合をブラウザ上で完結
+              {t("landing.hero.subtitle")}
             </p>
           </div>
         </div>
 
-        {/* 機能グリッド */}
+        {/* Feature grid */}
         <div className="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-2 sm:gap-3 sm:px-8 sm:py-6">
           {features.map((feature) => (
             <div
@@ -135,7 +133,7 @@ export function LandingPage() {
           ))}
         </div>
 
-        {/* ドロップゾーン / CTA */}
+        {/* Dropzone / CTA */}
         <div className="px-4 pb-3 sm:px-8 sm:pb-4">
           <button
             type="button"
@@ -155,16 +153,16 @@ export function LandingPage() {
             </div>
             <div className="text-center">
               <p className="text-sm font-medium">
-                PDFファイルをドラッグ＆ドロップ
+                {t("landing.dropzone.dragText")}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                またはクリックしてファイルを選択
+                {t("landing.dropzone.clickText")}
               </p>
             </div>
           </button>
         </div>
 
-        {/* フッター */}
+        {/* Footer */}
         <div className="flex items-center justify-center gap-1.5 border-t bg-muted/30 px-4 py-2.5 sm:px-8 sm:py-3">
           <HugeiconsIcon
             icon={ShieldIcon}
@@ -172,17 +170,17 @@ export function LandingPage() {
             className="size-3.5 text-muted-foreground/70"
           />
           <p className="text-xs text-muted-foreground/70">
-            すべての処理はブラウザ上で完結します。ファイルがサーバーに送信されることはありません。
+            {t("landing.footer.privacy")}
           </p>
         </div>
       </div>
 
-      {/* ローディング */}
+      {/* Loading overlay */}
       {state.isLoading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-xs">
           <div className="flex items-center gap-3 rounded-xl border bg-background px-6 py-4 shadow-lg">
             <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <span className="text-sm font-medium">PDFを読み込み中…</span>
+            <span className="text-sm font-medium">{t("common.loading")}</span>
           </div>
         </div>
       )}

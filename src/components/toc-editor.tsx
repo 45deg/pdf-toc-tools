@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react"
+import { useTranslation } from "react-i18next"
 import { useActiveFile, usePdfStore } from "@/hooks/use-pdf-store"
 import {
   exportOutlineAsJson,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/card"
 
 export function TocEditor() {
+  const { t } = useTranslation()
   const activeFile = useActiveFile()
   const { actions } = usePdfStore()
 
@@ -33,7 +35,7 @@ export function TocEditor() {
   const [error, setError] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
 
-  // ファイル変更時にリセット
+  // Reset when file changes
   const fileId = activeFile?.id
   const [lastFileId, setLastFileId] = useState(fileId)
   if (fileId !== lastFileId) {
@@ -58,17 +60,17 @@ export function TocEditor() {
       const outline = importOutlineFromJson(jsonText)
       actions.updateOutline(outline)
 
-      // PDFにも適用
+      // Apply to PDF as well
       const newData = await applyOutlinesToPdf(activeFile.data, outline)
-      // data を更新（store経由）
-      // 注: 簡略化のため、outline のみ更新。PDFバイナリの更新はダウンロード時に行う
+      // Update data via store
+      // Note: For simplicity, only outline is updated here. PDF binary update happens at download.
       setIsDirty(false)
       setError(null)
-      void newData // PDFバイナリ更新は保存時に行う
+      void newData // PDF binary update is handled during save
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Invalid JSON")
+      setError(e instanceof Error ? e.message : t("landing.tocEditor.errorJson"))
     }
-  }, [activeFile, jsonText, actions])
+  }, [activeFile, jsonText, actions, t])
 
   const handleReset = useCallback(() => {
     setJsonText(initialJson)
@@ -117,21 +119,21 @@ export function TocEditor() {
           const json = exportOutlineAsJson(outline)
           handleTextChange(json)
         } else {
-          // JSON バリデーション
+          // JSON Validation
           importOutlineFromJson(text)
           handleTextChange(text)
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Import failed")
+        setError(e instanceof Error ? e.message : t("landing.tocEditor.errorJson"))
       }
     }
     input.click()
-  }, [handleTextChange])
+  }, [handleTextChange, t])
 
   if (!activeFile) {
     return (
       <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-        ファイルを選択してください
+        {t("common.noFileSelected")}
       </div>
     )
   }
@@ -141,45 +143,44 @@ export function TocEditor() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            TOCエディタ
-            {isDirty && <Badge variant="secondary">未適用</Badge>}
+            {t("landing.tocEditor.title")}
+            {isDirty && <Badge variant="secondary">{t("landing.tocEditor.unapplied")}</Badge>}
           </CardTitle>
           <CardDescription>
-            しおり（Document Outline）をJSON形式で編集できます。
-            変更を「適用」すると、PDFのしおり構造が更新されます。
+            {t("landing.tocEditor.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
-            {/* エクスポート・インポートボタン */}
+            {/* Export/Import buttons */}
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleExport("json")}
               >
-                JSON エクスポート
+                {t("landing.tocEditor.exportJson")}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleExport("csv")}
               >
-                CSV エクスポート
+                {t("landing.tocEditor.exportCsv")}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleExport("markdown")}
               >
-                Markdown エクスポート
+                {t("landing.tocEditor.exportMarkdown")}
               </Button>
               <Button variant="outline" size="sm" onClick={handleImport}>
-                JSON/CSV インポート
+                {t("landing.tocEditor.import")}
               </Button>
             </div>
 
-            {/* JSONエディタ */}
+            {/* JSON Editor */}
             <textarea
               className="border-input bg-muted/30 focus-visible:border-ring focus-visible:ring-ring/50 min-h-[400px] w-full rounded-lg border p-3 font-mono text-sm outline-none focus-visible:ring-3"
               value={jsonText}
@@ -196,7 +197,7 @@ export function TocEditor() {
         </CardContent>
         <CardFooter>
           <Button onClick={handleApply} disabled={!isDirty}>
-            適用
+            {t("landing.tocEditor.apply")}
           </Button>
           <Button
             variant="outline"
@@ -204,7 +205,7 @@ export function TocEditor() {
             disabled={!isDirty}
             className="ml-2"
           >
-            リセット
+            {t("landing.tocEditor.reset")}
           </Button>
         </CardFooter>
       </Card>

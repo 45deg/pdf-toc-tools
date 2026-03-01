@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { usePdfStore, useActiveFile } from "@/hooks/use-pdf-store"
 import type { OutlineNode, OutlineFilter, LoadedPdf } from "@/lib/pdf/types"
 import { cn } from "@/lib/utils"
@@ -25,21 +26,22 @@ const MAX_WIDTH = 500
 const DEFAULT_WIDTH = 240
 
 interface SidebarProps {
-  /** モバイルドロワーとして表示するか */
+  /** Display as mobile drawer */
   mobile?: boolean
-  /** モバイル時に閉じるコールバック */
+  /** Callback to close in mobile mode */
   onClose?: () => void
 }
 
 export function Sidebar({ mobile = false, onClose }: SidebarProps = {}) {
+  const { t } = useTranslation()
   const { state, actions } = usePdfStore()
   const activeFile = useActiveFile()
 
-  // ---- リサイズ ----
+  // ---- Resize ----
   const [width, setWidth] = useState(DEFAULT_WIDTH)
 
-  // ---- 全展開/全折りたたみ ----
-  // generation が変わるたびに全ノードが同期する
+  // ---- Expand All / Collapse All ----
+  // Synchronize all nodes whenever generation changes
   const [expandOverride, setExpandOverride] = useState<{
     expanded: boolean
     generation: number
@@ -90,40 +92,40 @@ export function Sidebar({ mobile = false, onClose }: SidebarProps = {}) {
       )}
       style={mobile ? undefined : { width }}
     >
-      {/* モバイル: 閉じるボタン付きヘッダー */}
+      {/* Mobile: Header with close button */}
       {mobile && onClose && (
         <div className="border-border flex items-center justify-between border-b px-3 py-2">
-          <span className="text-sm font-semibold">ナビゲーション</span>
+          <span className="text-sm font-semibold">{t("sidebar.navigation")}</span>
           <button
             className="text-muted-foreground hover:text-foreground rounded-md p-1 transition-colors"
             onClick={onClose}
-            aria-label="閉じる"
+            aria-label={t("sidebar.closeAria")}
           >
             <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-4" />
           </button>
         </div>
       )}
 
-      {/* ファイル一覧（DnD対応） */}
+      {/* File List (DnD supported) */}
       <div className="border-border border-b p-2">
         <div className="text-muted-foreground px-2 py-1 text-xs font-medium uppercase tracking-wider">
-          Files
+          {t("sidebar.files")}
         </div>
         <FileList />
       </div>
 
-      {/* アウトラインツリー */}
+      {/* Outline Tree */}
       <div className="flex-1 overflow-auto p-2">
         <div className="text-muted-foreground flex items-center gap-1 px-2 py-1">
           <span className="flex-1 text-xs font-medium uppercase tracking-wider">
-            Outline
+            {t("sidebar.outline")}
           </span>
           {state.outlineFilter && (
             <button
               className="text-primary hover:text-primary/80 mr-1 text-[10px] font-medium"
               onClick={() => actions.setOutlineFilter(null)}
             >
-              フィルタ解除
+              {t("sidebar.clearFilter")}
             </button>
           )}
           {activeFile && activeFile.outline.length > 0 && (
@@ -131,14 +133,14 @@ export function Sidebar({ mobile = false, onClose }: SidebarProps = {}) {
               <button
                 className="text-muted-foreground hover:text-foreground rounded p-0.5 transition-colors"
                 onClick={expandAll}
-                title="すべて展開"
+                title={t("sidebar.expandAll")}
               >
                 <HugeiconsIcon icon={UnfoldMoreIcon} strokeWidth={2} className="size-3.5" />
               </button>
               <button
                 className="text-muted-foreground hover:text-foreground rounded p-0.5 transition-colors"
                 onClick={collapseAll}
-                title="すべて折りたたむ"
+                title={t("sidebar.collapseAll")}
               >
                 <HugeiconsIcon icon={UnfoldLessIcon} strokeWidth={2} className="size-3.5" />
               </button>
@@ -164,12 +166,12 @@ export function Sidebar({ mobile = false, onClose }: SidebarProps = {}) {
           </div>
         ) : (
           <div className="text-muted-foreground px-2 py-2 text-xs">
-            {activeFile ? "しおりがありません" : "ファイルを選択してください"}
+            {activeFile ? t("sidebar.noOutline") : t("sidebar.selectFile")}
           </div>
         )}
       </div>
 
-      {/* リサイズハンドル（デスクトップのみ） */}
+      {/* Resize Handle (Desktop only) */}
       {!mobile && (
         <div
           className="absolute top-0 right-0 z-10 h-full w-1 cursor-col-resize hover:bg-primary/20 active:bg-primary/30"
@@ -181,13 +183,13 @@ export function Sidebar({ mobile = false, onClose }: SidebarProps = {}) {
 }
 
 /**
- * DnD対応のファイル一覧
+ * File list with DnD support
  */
 function FileList() {
   const { state, actions } = usePdfStore()
   const [items, setItems] = useState(() => state.files.map((f) => f.id))
 
-  // files が外部から変わったら同期
+  // Synchronize if files change externally
   useEffect(() => {
     setItems(state.files.map((f) => f.id))
   }, [state.files])
@@ -279,7 +281,7 @@ function SortableFileItem({
 }
 
 /**
- * 兄弟ノードの配列内でindexのノードの終了ページを計算する
+ * Computes the end page for a node at the given index within its siblings array
  */
 function computeEndPage(
   siblings: OutlineNode[],
@@ -305,11 +307,12 @@ function OutlineTreeNode({
   totalPages: number
   expandOverride: { expanded: boolean; generation: number }
 }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(depth < 2)
   const { state, actions } = usePdfStore()
   const hasChildren = node.children.length > 0
 
-  // 全展開/全折りたたみの同期
+  // Expand All / Collapse All synchronization
   useEffect(() => {
     if (expandOverride.generation > 0) {
       setExpanded(expandOverride.expanded)
@@ -323,7 +326,7 @@ function OutlineTreeNode({
 
   const activeFile = useActiveFile()
 
-  // ラベルクリック: フィルタ設定/解除
+  // Label click: toggle filter
   const handleLabelClick = useCallback(() => {
     if (isActive) {
       actions.setOutlineFilter(null)
@@ -337,7 +340,7 @@ function OutlineTreeNode({
     }
   }, [actions, node.pageIndex, node.title, endPage, isActive])
 
-  // シェブロンクリック: 展開/折りたたみのみ
+  // Chevron click: expand/collapse only
   const handleToggleExpand = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -346,7 +349,7 @@ function OutlineTreeNode({
     []
   )
 
-  // セクション単位でダウンロード
+  // Download by section
   const handleDownloadSection = useCallback(
     async (e: React.MouseEvent) => {
       e.stopPropagation()
@@ -370,7 +373,7 @@ function OutlineTreeNode({
         style={{ paddingLeft: `${depth * 12 + 4}px` }}
         onClick={handleLabelClick}
       >
-        {/* シェブロンアイコン（展開/折りたたみ） */}
+        {/* Chevron icon (expand/collapse) */}
         {hasChildren ? (
           <button
             className={cn(
@@ -388,7 +391,7 @@ function OutlineTreeNode({
             />
           </button>
         ) : (
-          /* 葉ノードのインデント用スペーサー */
+          /* Spacer for indentation of leaf nodes */
           <span className="inline-block w-4 shrink-0" />
         )}
         <span className="min-w-0 flex-1 truncate">{node.title}</span>
@@ -400,7 +403,7 @@ function OutlineTreeNode({
         >
           p.{node.pageIndex + 1}
         </span>
-        {/* セクションダウンロードボタン */}
+        {/* Section download button */}
         <button
           className={cn(
             "shrink-0 rounded p-0.5 opacity-0 transition-all group-hover:opacity-100",
@@ -409,7 +412,7 @@ function OutlineTreeNode({
               : "text-muted-foreground hover:bg-muted-foreground/10 hover:text-foreground"
           )}
           onClick={handleDownloadSection}
-          title={`「${node.title}」をダウンロード`}
+          title={t("sidebar.downloadSection", { title: node.title })}
         >
           <HugeiconsIcon icon={DownloadIcon} strokeWidth={2} className="size-3" />
         </button>

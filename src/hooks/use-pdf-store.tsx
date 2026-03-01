@@ -5,6 +5,7 @@ import {
   useCallback,
   useMemo,
 } from "react"
+import { useTranslation } from "react-i18next"
 import type { ReactNode } from "react"
 import type {
   LoadedPdf,
@@ -17,7 +18,7 @@ import { parsePdf } from "@/lib/pdf/parser"
 
 // ===== State =====
 
-/** ファイル読み込みエラー */
+/** File loading error */
 export interface LoadError {
   fileName: string
   message: string
@@ -27,7 +28,7 @@ interface PdfState {
   files: LoadedPdf[]
   activeFileId: string | null
   viewMode: ViewMode
-  selectedPages: number[] // activeFile.pageOrder 内でのインデックス
+  selectedPages: number[] // Index within activeFile.pageOrder
   outlineFilter: OutlineFilter | null
   isLoading: boolean
   loadErrors: LoadError[]
@@ -213,6 +214,7 @@ const PdfStoreContext = createContext<PdfStoreContextType | null>(null)
 // ===== Provider =====
 
 export function PdfStoreProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation()
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const loadFiles = useCallback(
@@ -223,13 +225,13 @@ export function PdfStoreProvider({ children }: { children: ReactNode }) {
       try {
         for (const file of files) {
           if (!file.name.toLowerCase().endsWith(".pdf")) {
-            errors.push({ fileName: file.name, message: "PDFファイルではありません" })
+            errors.push({ fileName: file.name, message: t("errors.notPdf") })
             continue
           }
           try {
             const rawData = await file.arrayBuffer()
             const { pageCount, outline, metadata } = await parsePdf(rawData)
-            // store には必ず未 detach のコピーを保持する
+            // Always keep an undetached copy in the store
             const data = rawData.slice(0)
             dispatch({
               type: "ADD_FILE",
@@ -245,7 +247,7 @@ export function PdfStoreProvider({ children }: { children: ReactNode }) {
             })
           } catch (err) {
             const message =
-              err instanceof Error ? err.message : "不明なエラーが発生しました"
+              err instanceof Error ? err.message : t("common.error")
             errors.push({ fileName: file.name, message })
           }
         }
@@ -256,7 +258,7 @@ export function PdfStoreProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "SET_LOADING", payload: false })
       }
     },
-    []
+    [t]
   )
 
   const removeFile = useCallback((id: string) => {

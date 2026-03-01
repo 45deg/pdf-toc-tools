@@ -1,17 +1,19 @@
 import { useCallback } from "react"
 import { useDropzone } from "react-dropzone"
+import { useTranslation } from "react-i18next"
 import { usePdfStore } from "@/hooks/use-pdf-store"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { FileIcon } from "@hugeicons/core-free-icons"
 
 interface FileDropZoneProps {
-  /** ページ全体を覆うフルスクリーンモード */
+  /** Full screen mode covering the entire page */
   fullPage?: boolean
   className?: string
 }
 
 export function FileDropZone({ fullPage = false, className }: FileDropZoneProps) {
+  const { t } = useTranslation()
   const { state, actions } = usePdfStore()
 
   const onDrop = useCallback(
@@ -55,17 +57,17 @@ export function FileDropZone({ fullPage = false, className }: FileDropZoneProps)
           <div className="text-center">
             <p className="text-lg font-medium">
               {isDragActive
-                ? "ファイルをドロップしてください"
-                : "PDFファイルをドラッグ＆ドロップ"}
+                ? t("landing.dropzone.dropHere")
+                : t("landing.dropzone.dragText")}
             </p>
             <p className="text-muted-foreground mt-1 text-sm">
-              またはクリックしてファイルを選択
+              {t("landing.dropzone.clickText")}
             </p>
           </div>
           {state.isLoading && (
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
               <div className="border-primary size-4 animate-spin rounded-full border-2 border-t-transparent" />
-              読み込み中…
+              {t("common.loading")}
             </div>
           )}
         </div>
@@ -73,7 +75,7 @@ export function FileDropZone({ fullPage = false, className }: FileDropZoneProps)
     )
   }
 
-  // コンパクトなインライン版（ツールバー内など）
+  // Compact inline version (e.g., inside toolbar)
   return (
     <div
       {...getRootProps()}
@@ -87,7 +89,7 @@ export function FileDropZone({ fullPage = false, className }: FileDropZoneProps)
     >
       <input {...getInputProps()} />
       <span className="text-muted-foreground">
-        {isDragActive ? "ドロップ" : "+ PDF追加"}
+        {isDragActive ? t("landing.dropzone.drop") : t("landing.dropzone.addPdf")}
       </span>
     </div>
   )

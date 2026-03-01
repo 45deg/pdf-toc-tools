@@ -42,7 +42,7 @@ class MockIntersectionObserver {
     this.callback = callback
   }
   observe() {
-    // 即座にisIntersectingをtrueで呼び出す
+    // Immediately call with isIntersecting=true
     this.callback(
       [{ isIntersecting: true } as IntersectionObserverEntry],
       this as unknown as IntersectionObserver
@@ -74,3 +74,5 @@ if (typeof crypto.randomUUID === "undefined") {
 if (typeof window.devicePixelRatio === "undefined") {
   Object.defineProperty(window, "devicePixelRatio", { value: 1 })
 }
+
+import "./i18n-mock"

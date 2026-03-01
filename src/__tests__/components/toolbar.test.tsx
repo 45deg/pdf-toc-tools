@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { PdfStoreProvider } from "@/hooks/use-pdf-store"
 import { Toolbar } from "@/components/toolbar"
 
-// pdf operations をモック
+// Mock PDF operations
 vi.mock("@/lib/pdf/operations", () => ({
   createPdfWithPageOrder: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
   mergePdfs: vi.fn().mockResolvedValue({
@@ -22,38 +22,40 @@ function renderWithProvider(ui: React.ReactElement) {
 }
 
 describe("Toolbar", () => {
-  it("ビューモード切替ボタンを表示する", () => {
+  it("displays view mode toggle buttons", () => {
     renderWithProvider(<Toolbar />)
-    expect(screen.getByText("ページ")).toBeInTheDocument()
-    expect(screen.getByText("TOC")).toBeInTheDocument()
-    expect(screen.getByText("一括分割")).toBeInTheDocument()
-    expect(screen.getByText("メタデータ")).toBeInTheDocument()
+    expect(screen.getByText("toolbar.pages")).toBeInTheDocument()
+    expect(screen.getByText("toc.title")).toBeInTheDocument()
+    expect(screen.getByText("toolbar.split")).toBeInTheDocument()
+    expect(screen.getByText("toolbar.metadata")).toBeInTheDocument()
   })
 
-  it("ビューモードを切り替えられる", async () => {
+  it("can switch view modes", async () => {
     const user = userEvent.setup()
     renderWithProvider(<Toolbar />)
 
-    const tocButton = screen.getByText("TOC")
+    const tocButton = screen.getByText("toc.title")
     await user.click(tocButton)
-    // TOCボタンにアクティブスタイルが適用されることを確認
+    // Verify TOC button has active style applied
     expect(tocButton.className).toContain("bg-background")
   })
 
-  it("ダウンロードボタンが無効状態で表示される（ファイルなし）", () => {
+  it("displays download button in disabled state (no files)", () => {
     renderWithProvider(<Toolbar />)
-    const downloadButtons = screen.getAllByRole("button", { name: /ダウンロード/ })
-    downloadButtons.forEach((btn) => expect(btn).toBeDisabled())
+    const downloadLabel = screen.queryByText(/toolbar\.download\.total/i)
+    expect(downloadLabel).toBeInTheDocument()
+    const downloadButton = downloadLabel?.closest("button")
+    expect(downloadButton).toBeDisabled()
   })
 
-  it("PDF追加のドロップゾーンを表示する", () => {
+  it("displays file drop zone for adding PDFs", () => {
     renderWithProvider(<Toolbar />)
-    expect(screen.getByText("+ PDF追加")).toBeInTheDocument()
+    expect(screen.getByText("landing.dropzone.addPdf")).toBeInTheDocument()
   })
 
-  it("ビューモードの初期値は pages", () => {
+  it("sets initial view mode to pages", () => {
     renderWithProvider(<Toolbar />)
-    const pagesButton = screen.getByText("ページ")
+    const pagesButton = screen.getByText("toolbar.pages")
     expect(pagesButton.className).toContain("bg-background")
   })
 })

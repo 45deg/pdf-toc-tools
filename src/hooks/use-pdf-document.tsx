@@ -18,8 +18,8 @@ import { thumbnailCache, ThumbnailCacheKey } from "@/lib/pdf/thumbnail-cache"
 const PdfDocContext = createContext<PDFDocumentProxy | null>(null)
 
 /**
- * pdfjs-dist のドキュメントをコンテキストで提供するプロバイダ。
- * react-pdf の <Document> の代替。
+ * Provider that provides pdfjs-dist document via context.
+ * Alternative to <Document> from react-pdf.
  */
 export function PdfDocumentProvider({
   data,
@@ -48,13 +48,13 @@ export function PdfDocumentProvider({
 
     setStatus("loading")
 
-    // 前回のロードをキャンセル
+    // Cancel previous load
     if (taskRef.current) {
       taskRef.current.destroy()
     }
 
-    // ArrayBuffer はコピーして渡す。pdfjs-dist は内部で transfer/detach するため、
-    // 元の ArrayBuffer を渡すと React の再レンダリング時に detached エラーになる。
+    // Pass the copy of ArrayBuffer. pdfjs-dist transfers/detaches internally,
+    // so passing the original ArrayBuffer results in a detached error on React re-render.
     const copy = data.slice(0)
     const task = pdfjsLib.getDocument({
       data: new Uint8Array(copy),
@@ -68,7 +68,7 @@ export function PdfDocumentProvider({
         setStatus("ready")
       })
       .catch((err) => {
-        // destroy() によるキャンセルは無視
+        // Ignore cancellation by destroy()
         if (err?.name !== "MissingPDFException") {
           setStatus("error")
         }
@@ -93,16 +93,16 @@ export function usePdfDocument() {
 // ===== PdfPageCanvas =====
 
 /**
- * 指定ページを canvas にレンダリングするコンポーネント。
- * react-pdf の <Page> の代替。
+ * Component that renders a specific page to a canvas.
+ * Alternative to <Page> from react-pdf.
  */
 export const PdfPageCanvas = memo(function PdfPageCanvas({
   pageNumber,
   width,
 }: {
-  /** 1-indexed ページ番号 */
+  /** 1-indexed page number */
   pageNumber: number
-  /** 表示幅 (px) */
+  /** Display width (px) */
   width: number
 }) {
   const pdfDoc = usePdfDocument()
@@ -123,7 +123,7 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
     const fingerprint = pdfDoc.fingerprints?.[0] ?? ""
     const cacheKey = ThumbnailCacheKey(fingerprint, pageNumber, width)
 
-    // --- キャッシュヒット: ImageBitmap を即座に描画 ---
+    // --- Cache Hit: Render ImageBitmap immediately ---
     const cached = thumbnailCache.get(cacheKey)
     if (cached) {
       const canvas = canvasRef.current
@@ -138,7 +138,7 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
       return
     }
 
-    // --- キャッシュミス: PDF からレンダリング ---
+    // --- Cache Miss: Render from PDF ---
     try {
       const page = await pdfDoc.getPage(pageNumber)
       const unscaledViewport = page.getViewport({ scale: 1 })
@@ -157,7 +157,7 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
       const ctx = canvas.getContext("2d")!
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-      // 前のレンダリングをキャンセル
+      // Cancel previous rendering
       if (renderTaskRef.current) {
         (renderTaskRef.current as any).cancel?.()
       }
@@ -166,15 +166,15 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
       renderTaskRef.current = task as any
       await task.promise
 
-      // レンダリング成功 → キャッシュに格納
+      // Rendering success -> Store in cache
       try {
         const bitmap = await createImageBitmap(canvas)
         thumbnailCache.set(cacheKey, bitmap)
       } catch {
-        // createImageBitmap 非対応環境は無視（キャッシュなしで動作）
+        // Ignore environments where createImageBitmap is not supported (works without cache)
       }
     } catch {
-      // cancelled – 無視
+      // cancelled - ignore
     }
   }, [pdfDoc, pageNumber, width])
 

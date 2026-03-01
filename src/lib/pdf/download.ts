@@ -1,7 +1,7 @@
 import JSZip from "jszip"
 import type { SplitResult } from "./types"
 
-/** 単一ファイルをダウンロードする */
+/** Download a single file */
 export function downloadBlob(data: Uint8Array | ArrayBuffer, filename: string) {
   const blob = new Blob([data instanceof ArrayBuffer ? data : data.slice().buffer], { type: "application/pdf" })
   const url = URL.createObjectURL(blob)
@@ -14,7 +14,7 @@ export function downloadBlob(data: Uint8Array | ArrayBuffer, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-/** テキストファイルをダウンロードする */
+/** Download a text file */
 export function downloadText(text: string, filename: string, mime = "text/plain") {
   const blob = new Blob([text], { type: mime })
   const url = URL.createObjectURL(blob)
@@ -27,7 +27,7 @@ export function downloadText(text: string, filename: string, mime = "text/plain"
   URL.revokeObjectURL(url)
 }
 
-/** 分割結果をZIPにまとめてダウンロードする */
+/** Download split results as a ZIP archive */
 export async function downloadSplitsAsZip(
   splits: SplitResult[],
   zipFilename: string = "split.zip"

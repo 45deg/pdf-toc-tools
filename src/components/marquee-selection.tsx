@@ -8,24 +8,24 @@ interface Rect {
 }
 
 interface MarqueeSelectionProps {
-  /** マーキー選択を有効にするコンテナの ref */
+  /** Ref of the container to enable marquee selection on */
   containerRef: React.RefObject<HTMLElement | null>
-  /** data-page-index 属性を持つサムネイル要素のセレクタ */
+  /** Selector for thumbnail elements with data-page-index attribute */
   itemSelector?: string
-  /** マーキーで選択中のインデックスが変わった時 */
+  /** When the indices selected by the marquee change */
   onSelectionChange: (indices: number[]) => void
-  /** ドラッグ完了時（マウスアップ） */
+  /** When dragging is complete (mouse up) */
   onSelectionEnd: (indices: number[]) => void
-  /** マーキー開始前の既存選択（Cmd 併用で追加用） */
+  /** Existing selection before marquee starts (for addition with Cmd key) */
   previousSelection?: number[]
-  /** タッチデバイスでは無効 */
+  /** Disabled on touch devices */
   enabled?: boolean
 }
 
 /**
- * OS風の矩形（マーキー）選択。
- * containerRef の上に position: absolute でオーバーレイ描画する。
- * PC のみ（pointer: fine）で動作。
+ * OS-style rectangular (marquee) selection.
+ * Draws an overlay using position: absolute over containerRef.
+ * Works on PC only (pointer: fine).
  */
 export function useMarqueeSelection({
   containerRef,
@@ -63,7 +63,7 @@ export function useMarqueeSelection({
       const indices: number[] = []
       const containerRect = container.getBoundingClientRect()
 
-      // マーキー矩形をビューポート座標に変換
+      // Convert marquee rectangle to viewport coordinates
       const marqueeViewport = {
         left: containerRect.left + rect.x - container.scrollLeft,
         top: containerRect.top + rect.y - container.scrollTop,
@@ -75,7 +75,7 @@ export function useMarqueeSelection({
         const idx = parseInt(item.getAttribute("data-page-index") ?? "", 10)
         if (isNaN(idx)) return
         const itemRect = item.getBoundingClientRect()
-        // 矩形の交差判定
+        // Determine rectangle intersection
         if (
           itemRect.right > marqueeViewport.left &&
           itemRect.left < marqueeViewport.right &&
@@ -93,13 +93,13 @@ export function useMarqueeSelection({
   const handlePointerDown = useCallback(
     (e: PointerEvent) => {
       if (!enabled) return
-      // ポインターがfine（マウス）でない場合は無効
+      // Disabled if pointer is not fine (mouse)
       const isFine = window.matchMedia("(pointer: fine)").matches
       if (!isFine) return
-      // サムネイル自体やチェックボックスのクリックは無視
+      // Ignore clicks on thumbnails themselves or checkboxes
       const target = e.target as HTMLElement
       if (target.closest("[data-page-index]") || target.closest("[role='checkbox']")) return
-      // 右クリック無視
+      // Ignore right click
       if (e.button !== 0) return
 
       startPosRef.current = getContainerRelativePos(e.clientX, e.clientY)
@@ -129,7 +129,7 @@ export function useMarqueeSelection({
       setMarqueeRect(rect)
 
       const marqueeIndices = getIntersectingIndices(rect)
-      // Cmd/Ctrl 押下時は既存選択に追加
+      // Add to existing selection if Cmd/Ctrl is pressed
       const combined = e.metaKey || e.ctrlKey
         ? [...new Set([...prevSelRef.current, ...marqueeIndices])]
         : marqueeIndices
@@ -170,7 +170,7 @@ export function useMarqueeSelection({
   return { marqueeRect, isDragging: isDraggingRef.current }
 }
 
-/** マーキー矩形のオーバーレイ描画 */
+/** Marquee rectangle overlay rendering */
 export function MarqueeOverlay({ rect }: { rect: Rect | null }) {
   if (!rect) return null
   return (

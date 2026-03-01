@@ -3,8 +3,8 @@ import type { PDFDocument } from "pdf-lib"
 import type { OutlineNode } from "./types"
 
 /**
- * pdf-lib ドキュメントにしおり（Outlines）ツリーを書き込む。
- * 既存のアウトラインは上書きされる。
+ * Writes the outline tree (bookmarks) to the pdf-lib document.
+ * Existing outlines will be overwritten.
  */
 export function writeOutlinesToPdf(
   pdfDoc: PDFDocument,
@@ -39,7 +39,7 @@ export function writeOutlinesToPdf(
     const counts: number[] = []
 
     for (const item of items) {
-      // 空の辞書を作成し、先に参照を確保する（子の Parent 設定に必要）
+      // Create a dictionary and register it first (needed for parent setting of children)
       const dict: any = ctx.obj({})
       const ref = ctx.register(dict)
       refs.push(ref)
@@ -59,7 +59,7 @@ export function writeOutlinesToPdf(
       counts.push(1 + subtreeCount)
     }
 
-    // 兄弟間の Prev / Next リンクを設定
+    // Set Prev / Next links between siblings
     for (let i = 0; i < refs.length; i++) {
       const d: any = ctx.lookup(refs[i])
       if (i > 0) d.set(PDFName.of("Prev"), refs[i - 1])
@@ -73,7 +73,7 @@ export function writeOutlinesToPdf(
     }
   }
 
-  // ルート Outlines 辞書
+  // Root Outlines dictionary
   const rootDict: any = ctx.obj({})
   const rootRef = ctx.register(rootDict)
   const { first, last, count } = buildLevel(outlines, rootRef)

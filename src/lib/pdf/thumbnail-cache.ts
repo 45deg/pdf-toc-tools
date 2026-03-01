@@ -1,10 +1,10 @@
 /**
- * PDF サムネイルの ImageBitmap キャッシュ。
+ * ImageBitmap cache for PDF thumbnails.
  *
- * キー: `${fingerprint}:${pageNumber}:${width}` 形式の文字列
- * 値 : ImageBitmap（GPU メモリに保持され、canvas への描画が高速）
+ * Key: String in `${fingerprint}:${pageNumber}:${width}` format
+ * Value: ImageBitmap (Held in GPU memory, fast drawing to canvas)
  *
- * LRU 方式で最大エントリ数を制限し、メモリリークを防止する。
+ * Limits max entries with LRU policy to prevent memory leaks.
  */
 
 const DEFAULT_MAX_ENTRIES = 500
@@ -17,34 +17,34 @@ class ThumbnailCache {
     this.maxEntries = maxEntries
   }
 
-  /** キャッシュキーを生成する */
+  /** Generates a cache key */
   static key(fingerprint: string, pageNumber: number, width: number): string {
-    // devicePixelRatio もキーに含める（Retina 切替対応）
+    // Include devicePixelRatio in the key (Retina display support)
     const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
     return `${fingerprint}:${pageNumber}:${width}:${dpr}`
   }
 
-  /** キャッシュからサムネイルを取得する。ヒット時は LRU 順序を更新。 */
+  /** Gets a thumbnail from cache. Updates LRU order on hit. */
   get(key: string): ImageBitmap | undefined {
     const bitmap = this.cache.get(key)
     if (bitmap) {
-      // LRU: 末尾（最新）に移動
+      // LRU: Move to the end (most recent)
       this.cache.delete(key)
       this.cache.set(key, bitmap)
     }
     return bitmap
   }
 
-  /** サムネイルをキャッシュに格納する。容量超過時は最も古いエントリを破棄。 */
+  /** Stores a thumbnail in cache. Evicts the oldest entry if capacity is exceeded. */
   set(key: string, bitmap: ImageBitmap): void {
-    // 既存キーがあれば古い bitmap を解放
+    // If key already exists, release the old bitmap
     const existing = this.cache.get(key)
     if (existing) {
       existing.close()
       this.cache.delete(key)
     }
 
-    // 容量超過時に古いエントリを削除
+    // Remove oldest entries if capacity is exceeded
     while (this.cache.size >= this.maxEntries) {
       const oldest = this.cache.keys().next().value
       if (oldest === undefined) break
@@ -55,7 +55,7 @@ class ThumbnailCache {
     this.cache.set(key, bitmap)
   }
 
-  /** 指定 fingerprint に紐づくキャッシュをすべて破棄する */
+  /** Evicts all cache entries associated with a specific fingerprint */
   evictByFingerprint(fingerprint: string): void {
     const prefix = `${fingerprint}:`
     for (const [key, bitmap] of this.cache) {
@@ -66,7 +66,7 @@ class ThumbnailCache {
     }
   }
 
-  /** 全キャッシュを破棄する */
+  /** Clears all cache entries */
   clear(): void {
     for (const bitmap of this.cache.values()) {
       bitmap.close()
@@ -79,10 +79,10 @@ class ThumbnailCache {
   }
 }
 
-/** アプリ全体で共有するシングルトンインスタンス */
+/** Singleton instance shared across the application */
 export const thumbnailCache = new ThumbnailCache()
 
-/** キャッシュキーを生成するユーティリティ関数 */
+/** Utility function to generate a cache key */
 export function ThumbnailCacheKey(fingerprint: string, pageNumber: number, width: number): string {
   return ThumbnailCache.key(fingerprint, pageNumber, width)
 }

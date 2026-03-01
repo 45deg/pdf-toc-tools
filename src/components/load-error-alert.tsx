@@ -1,4 +1,5 @@
 import { usePdfStore } from "@/hooks/use-pdf-store"
+import { useTranslation } from "react-i18next"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,10 +14,11 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { AlertCircleIcon } from "@hugeicons/core-free-icons"
 
 /**
- * PDF ファイル読み込みエラー時に表示されるアラートダイアログ。
- * loadErrors が空でないとき自動で開く。
+ * Alert dialog displayed when an error occurs during PDF file loading.
+ * Automatically opens when loadErrors is not empty.
  */
 export function LoadErrorAlert() {
+  const { t } = useTranslation()
   const { state, actions } = usePdfStore()
   const { loadErrors } = state
 
@@ -35,8 +37,8 @@ export function LoadErrorAlert() {
           </AlertDialogMedia>
           <AlertDialogTitle>
             {loadErrors.length === 1
-              ? "ファイルを読み込めませんでした"
-              : `${loadErrors.length}件のファイルを読み込めませんでした`}
+              ? t("errors.loadFailed")
+              : t("errors.loadFailedMany", { count: loadErrors.length })}
           </AlertDialogTitle>
           <AlertDialogDescription render={<div />}>
             <ul className="mt-1 space-y-1 text-left">
@@ -58,7 +60,7 @@ export function LoadErrorAlert() {
           <AlertDialogAction
             onClick={() => actions.clearLoadErrors()}
           >
-            閉じる
+            {t("common.close")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

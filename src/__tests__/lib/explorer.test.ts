@@ -19,23 +19,23 @@ const sampleOutline: OutlineNode[] = [
 ]
 
 describe("buildExplorerTree", () => {
-  it("しおりが無い場合はフラットなページリストを返す", () => {
+  it("returns a flat page list if there are no outlines", () => {
     const result = buildExplorerTree([], 5, [0, 1, 2, 3, 4])
     expect(result).toHaveLength(5)
     expect(result[0]).toEqual({ type: "page", label: "Page 1", pageIndex: 0 })
     expect(result[4]).toEqual({ type: "page", label: "Page 5", pageIndex: 4 })
   })
 
-  it("totalPages が 0 の場合は空配列を返す", () => {
+  it("returns an empty array if totalPages is 0", () => {
     const result = buildExplorerTree(sampleOutline, 0, [])
     expect(result).toEqual([])
   })
 
-  it("しおりからフォルダ構造を構築する", () => {
+  it("builds folder structure from outlines", () => {
     const result = buildExplorerTree(sampleOutline, 6, [0, 1, 2, 3, 4, 5])
     expect(result).toHaveLength(2)
 
-    // Chapter 1 フォルダ
+    // Chapter 1 folder
     const ch1 = result[0]
     expect(ch1.type).toBe("folder")
     expect(ch1.label).toBe("Chapter 1")
@@ -43,7 +43,7 @@ describe("buildExplorerTree", () => {
     expect(ch1.endPage).toBe(3)
     expect(ch1.children).toHaveLength(2)
 
-    // Chapter 2 フォルダ（子しおりなし→ページ直接列挙）
+    // Chapter 2 folder (no children outlines -> direct page enumeration)
     const ch2 = result[1]
     expect(ch2.type).toBe("folder")
     expect(ch2.label).toBe("Chapter 2")
@@ -53,7 +53,7 @@ describe("buildExplorerTree", () => {
     expect(ch2.children![0].type).toBe("page")
   })
 
-  it("子しおりが無いフォルダにはページが直接含まれる", () => {
+  it("includes pages directly in folders with no child outlines", () => {
     const outline: OutlineNode[] = [
       { title: "Only Chapter", pageIndex: 0, children: [] },
     ]
@@ -65,21 +65,21 @@ describe("buildExplorerTree", () => {
     expect(folder.children!.every((c) => c.type === "page")).toBe(true)
   })
 
-  it("pageOrder がシャッフルされていても正しく処理する", () => {
+  it("handles shuffled pageOrder correctly", () => {
     const outline: OutlineNode[] = [
       { title: "A", pageIndex: 0, children: [] },
       { title: "B", pageIndex: 3, children: [] },
     ]
-    // ページ順序を入れ替え
+    // Reverse page order
     const result = buildExplorerTree(outline, 6, [5, 4, 3, 2, 1, 0])
 
     expect(result).toHaveLength(2)
-    // フォルダAの中に originalPageIndex 0,1,2 のページが含まれる
+    // Folder A should contain pages with originalPageIndex 0,1,2
     const folderA = result[0]
     expect(folderA.children!.length).toBeGreaterThan(0)
   })
 
-  it("ネストしたしおりで子フォルダが正しく構築される", () => {
+  it("builds child folders correctly with nested outlines", () => {
     const result = buildExplorerTree(sampleOutline, 6, [0, 1, 2, 3, 4, 5])
     const ch1 = result[0]
     expect(ch1.children).toHaveLength(2)

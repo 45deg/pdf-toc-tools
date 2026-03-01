@@ -1,8 +1,8 @@
 import type { OutlineNode, ExplorerNode } from "./types"
 
 /**
- * しおりツリーからExplorer表示用のフォルダ・ファイル構造を構築する。
- * 各しおりノードをフォルダ、その中のページをファイルとして表現する。
+ * Builds a folder/file structure for explorer display from the bookmark tree.
+ * Each bookmark node is represented as a folder, and the pages within it as files.
  */
 export function buildExplorerTree(
   outline: OutlineNode[],
@@ -10,7 +10,7 @@ export function buildExplorerTree(
   pageOrder: number[]
 ): ExplorerNode[] {
   if (outline.length === 0 || totalPages === 0) {
-    // しおりが無い場合は全ページをフラットに表示
+    // If there are no bookmarks, display all pages flat
     return pageOrder.map((origIdx, i) => ({
       type: "page" as const,
       label: `Page ${i + 1}`,
@@ -39,7 +39,7 @@ export function buildExplorerTree(
       if (node.children.length > 0) {
         folder.children = processNodes(node.children, endPage)
       } else {
-        // 子しおりが無い場合はページを直接列挙
+        // If there are no child bookmarks, list the pages directly
         const pagesInRange = pageOrder.filter(
           (origIdx) => origIdx >= startPage && origIdx <= endPage
         )

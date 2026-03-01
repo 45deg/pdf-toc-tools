@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import { usePdfStore, useActiveFile } from "@/hooks/use-pdf-store"
 import { PdfDocumentProvider } from "@/hooks/use-pdf-document"
 import { PageThumbnail } from "@/components/page-thumbnail"
@@ -11,6 +12,7 @@ import { useSortable } from "@dnd-kit/react/sortable"
 import { move } from "@dnd-kit/helpers"
 
 export function PageGrid() {
+  const { t } = useTranslation()
   const { state, actions } = usePdfStore()
   const activeFile = useActiveFile()
 
@@ -19,7 +21,7 @@ export function PageGrid() {
     return activeFile.data
   }, [activeFile])
 
-  // outlineFilter に基づいてページをフィルタリング
+  // Filter pages based on outlineFilter
   const visiblePages = useMemo(() => {
     if (!activeFile) return []
     const all = activeFile.pageOrder.map((orig, idx) => ({
@@ -35,7 +37,7 @@ export function PageGrid() {
     )
   }, [activeFile, state.outlineFilter])
 
-  // DnD用のアイテムリスト
+  // Item list for DnD
   const [items, setItems] = useState(() => visiblePages.map((p) => p.id))
 
   useEffect(() => {
@@ -45,28 +47,28 @@ export function PageGrid() {
   const anchorRef = useRef<number | null>(null)
   const hasAnySelection = state.selectedPages.length > 0
 
-  // メインクリックハンドラ（アンカーベースの範囲選択対応）
+  // Main click handler (supports range selection with anchor)
   const handlePageClick = useCallback(
     (index: number, e: React.MouseEvent) => {
       if (e.shiftKey && anchorRef.current !== null) {
-        // Shift+Click: アンカーから範囲選択
+        // Shift+Click: Range selection from anchor
         const min = Math.min(anchorRef.current, index)
         const max = Math.max(anchorRef.current, index)
         const range = Array.from({ length: max - min + 1 }, (_, i) => min + i)
         if (e.metaKey || e.ctrlKey) {
-          // Shift+Cmd: 既存選択に範囲を追加
+          // Shift+Cmd: Add range to existing selection
           actions.setSelectedPages([...new Set([...state.selectedPages, ...range])])
         } else {
-          // Shift のみ: 範囲で置き換え
+          // Shift only: Replace with range
           actions.setSelectedPages(range)
         }
-        // anchor は更新しない（連続範囲選択を可能に）
+        // Do not update anchor (allows continuous range selection)
       } else if (e.metaKey || e.ctrlKey) {
-        // Cmd/Ctrl+Click: 個別トグル
+        // Cmd/Ctrl+Click: Individual toggle
         actions.togglePageSelection(index, false)
         anchorRef.current = index
       } else {
-        // 通常クリック: 単一選択
+        // Normal click: Single selection
         if (
           state.selectedPages.length === 1 &&
           state.selectedPages[0] === index
@@ -82,7 +84,7 @@ export function PageGrid() {
     [actions, state.selectedPages]
   )
 
-  // チェックボックスクリック（修飾キー不要のトグル）
+  // Checkbox click (toggle without modifiers)
   const handleToggleSelect = useCallback(
     (index: number) => {
       actions.togglePageSelection(index, false)
@@ -91,7 +93,7 @@ export function PageGrid() {
     [actions]
   )
 
-  // 選択ページを前に移動
+  // Move selected pages forward
   const handleMoveUp = useCallback(() => {
     if (!activeFile || state.selectedPages.length === 0) return
     const sorted = [...state.selectedPages].sort((a, b) => a - b)
@@ -104,7 +106,7 @@ export function PageGrid() {
     actions.setSelectedPages(sorted.map((i) => i - 1))
   }, [activeFile, state.selectedPages, actions])
 
-  // 選択ページを後ろに移動
+  // Move selected pages backward
   const handleMoveDown = useCallback(() => {
     if (!activeFile || state.selectedPages.length === 0) return
     const sorted = [...state.selectedPages].sort((a, b) => b - a)
@@ -117,7 +119,7 @@ export function PageGrid() {
     actions.setSelectedPages(sorted.map((i) => i + 1))
   }, [activeFile, state.selectedPages, actions])
 
-  // キーボードショートカット
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName
@@ -146,7 +148,7 @@ export function PageGrid() {
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform)
   const modKey = isMac ? "⌘" : "Ctrl+"
 
-  // マーキー（矩形）選択
+  // Marquee (rectangular) selection
   const gridContainerRef = useRef<HTMLDivElement>(null)
   const { marqueeRect } = useMarqueeSelection({
     containerRef: gridContainerRef,
@@ -161,7 +163,7 @@ export function PageGrid() {
   if (!activeFile || !fileData) {
     return (
       <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-        ファイルを選択してください
+        {t("pageGrid.noFile")}
       </div>
     )
   }
@@ -176,26 +178,29 @@ export function PageGrid() {
       }
       error={
         <div className="text-destructive flex h-full items-center justify-center text-sm">
-          PDFの読み込みに失敗しました
+          {t("pageGrid.loadError")}
         </div>
       }
     >
       <div className="flex h-full flex-col">
-        {/* フィルタ中の場合はインジケータ表示 */}
+        {/* Show indicator if filtering */}
         {state.outlineFilter && (
           <div className="border-border flex items-center gap-2 border-b px-4 py-2">
             <Badge variant="secondary" className="text-xs">
               {state.outlineFilter.label}
             </Badge>
             <span className="text-muted-foreground text-xs">
-              {visiblePages.length} ページ（p.{state.outlineFilter.startPage + 1}
-              –p.{state.outlineFilter.endPage + 1}）
+              {t("pageGrid.filterIndicator", {
+                count: visiblePages.length,
+                start: state.outlineFilter.startPage + 1,
+                end: state.outlineFilter.endPage + 1,
+              })}
             </span>
             <button
               className="text-muted-foreground hover:text-foreground ml-auto text-xs"
               onClick={() => actions.setOutlineFilter(null)}
             >
-              フィルタ解除
+              {t("pageGrid.clearFilter")}
             </button>
           </div>
         )}
@@ -206,19 +211,19 @@ export function PageGrid() {
             const updated = move(items, event)
             setItems(updated)
 
-            // items の id から currentIndex を復元し pageOrder を更新
+            // Restore currentIndex from items ids and update pageOrder
             const idToPage = new Map(
               visiblePages.map((p) => [p.id, p])
             )
             if (!state.outlineFilter) {
-              // フィルタなし: 全ページの並び替え
+              // No filter: reorder all pages
               const newPageOrder = updated.map((id) => {
                 const p = idToPage.get(id)
                 return p ? p.originalPageIndex : 0
               })
               actions.reorderPages(newPageOrder)
             } else {
-              // フィルタあり: フィルタ範囲内のみ並び替え
+              // Filter active: reorder only within the filtered range
               const newOrder = [...activeFile.pageOrder]
               const filteredIndices = visiblePages.map((p) => p.currentIndex)
               const reorderedOriginals = updated.map((id) => {
@@ -252,18 +257,39 @@ export function PageGrid() {
           </div>
         </DragDropProvider>
 
-        {/* フローティング選択バー */}
+        {/* Floating Selection Bar */}
         {hasAnySelection && (
           <div className="border-border bg-background/95 animate-in slide-in-from-bottom-2 flex items-center gap-1.5 border-t px-3 py-2 backdrop-blur-sm duration-200 sm:gap-2 sm:px-4">
             <div className="bg-primary/10 text-primary rounded-full px-2.5 py-0.5 text-xs font-medium tabular-nums sm:text-sm">
-              {state.selectedPages.length} / {activeFile.pageOrder.length} ページ選択中
+              {t("pageGrid.selectionBar.selected", {
+                count: state.selectedPages.length,
+                total: activeFile.pageOrder.length,
+              })}
             </div>
             <div className="text-muted-foreground hidden text-xs lg:block">
-              Shift+クリック: 範囲選択 · {modKey}A: 全選択 · ⌫: 削除
+              {t("pageGrid.selectionBar.rangeSelect")} ·{" "}
+              {t("pageGrid.selectionBar.selectAll", { modKey })} ·{" "}
+              {t("pageGrid.selectionBar.delete")}
             </div>
             <div className="flex-1" />
-            <Button size="sm" variant="ghost" onClick={handleMoveUp} title="前に移動" className="h-7 px-2">↑</Button>
-            <Button size="sm" variant="ghost" onClick={handleMoveDown} title="後に移動" className="h-7 px-2">↓</Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleMoveUp}
+              title={t("pageGrid.selectionBar.moveUp")}
+              className="h-7 px-2"
+            >
+              ↑
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleMoveDown}
+              title={t("pageGrid.selectionBar.moveDown")}
+              className="h-7 px-2"
+            >
+              ↓
+            </Button>
             <Separator orientation="vertical" className="mx-0.5 h-5" />
             <Button
               size="sm"
@@ -271,10 +297,15 @@ export function PageGrid() {
               onClick={() => actions.deleteSelectedPages()}
               className="text-destructive h-7 px-2"
             >
-              削除
+              {t("pageGrid.selectionBar.deleteAction")}
             </Button>
-            <Button size="sm" variant="ghost" onClick={actions.deselectAllPages} className="h-7 px-2">
-              選択解除
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={actions.deselectAllPages}
+              className="h-7 px-2"
+            >
+              {t("pageGrid.selectionBar.deselect")}
             </Button>
           </div>
         )}

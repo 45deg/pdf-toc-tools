@@ -5,7 +5,7 @@ import { TocEditor } from "@/components/toc-editor"
 import { MetadataPanel } from "@/components/metadata-panel"
 import { SplitPanel } from "@/components/split-panel"
 
-// モック
+// Mocks
 vi.mock("@/lib/pdf/operations", () => ({
   applyOutlinesToPdf: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
   splitByOutline: vi.fn().mockResolvedValue([]),
@@ -24,22 +24,22 @@ function renderWithProvider(ui: React.ReactElement) {
 }
 
 describe("TocEditor", () => {
-  it("ファイル未選択時にプレースホルダーを表示する", () => {
+  it("renders placeholder when no file is selected", () => {
     renderWithProvider(<TocEditor />)
-    expect(screen.getByText("ファイルを選択してください")).toBeInTheDocument()
+    expect(screen.getByText("common.noFileSelected")).toBeInTheDocument()
   })
 })
 
 describe("MetadataPanel", () => {
-  it("ファイル未選択時にプレースホルダーを表示する", () => {
+  it("renders placeholder when no file is selected", () => {
     renderWithProvider(<MetadataPanel />)
-    expect(screen.getByText("ファイルを選択してください")).toBeInTheDocument()
+    expect(screen.getByText("metadata.noFile")).toBeInTheDocument()
   })
 })
 
 describe("SplitPanel", () => {
-  it("ファイル未選択時にプレースホルダーを表示する", () => {
+  it("renders placeholder when no file is selected", () => {
     renderWithProvider(<SplitPanel />)
-    expect(screen.getByText("ファイルを選択してください")).toBeInTheDocument()
+    expect(screen.getByText("split.selectFile")).toBeInTheDocument()
   })
 })

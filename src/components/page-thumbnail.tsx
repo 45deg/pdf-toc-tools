@@ -1,17 +1,18 @@
 import { useState, useRef, useEffect, memo } from "react"
+import { useTranslation } from "react-i18next"
 import { PdfPageCanvas } from "@/hooks/use-pdf-document"
 import { cn } from "@/lib/utils"
 
 interface PageThumbnailProps {
-  /** 1-indexed ページ番号 */
+  /** 1-indexed page number */
   pageNumber: number
-  /** 現在のページ順序内でのインデックス（表示用） */
+  /** Index within the current page order (for display) */
   displayIndex: number
   selected: boolean
   onClick: (e: React.MouseEvent) => void
-  /** 他のページが1つでも選択されているか */
+  /** Whether any other page is selected */
   hasAnySelection?: boolean
-  /** チェックボックスクリック時（修飾キー不要のトグル選択） */
+  /** When checkbox is clicked (toggle selection without modifier keys) */
   onToggleSelect?: () => void
   width?: number
 }
@@ -25,6 +26,7 @@ export const PageThumbnail = memo(function PageThumbnail({
   onToggleSelect,
   width = 160,
 }: PageThumbnailProps) {
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -64,7 +66,7 @@ export const PageThumbnail = memo(function PageThumbnail({
           style={{ width, aspectRatio: "3/4" }}
         />
       )}
-      {/* 選択チェックボックス（左上） */}
+      {/* Selection checkbox (top-left) */}
       <div
         className={cn(
           "absolute top-1.5 left-1.5 flex size-5 items-center justify-center rounded-full border-2 transition-all duration-150",
@@ -80,7 +82,7 @@ export const PageThumbnail = memo(function PageThumbnail({
         }}
         role="checkbox"
         aria-checked={selected}
-        aria-label={`ページ ${displayIndex + 1} を選択`}
+        aria-label={t("thumbnail.ariaLabel", { page: displayIndex + 1 })}
       >
         {selected && (
           <svg className="size-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -89,7 +91,7 @@ export const PageThumbnail = memo(function PageThumbnail({
         )}
       </div>
 
-      {/* ページ番号バッジ */}
+      {/* Page number badge */}
       <div
         className={cn(
           "absolute bottom-0 inset-x-0 py-0.5 text-center text-xs font-medium transition-colors",
