@@ -12,7 +12,7 @@ function renderWithProvider(ui: React.ReactElement) {
 describe("LandingPage", () => {
   it("should display the title", () => {
     renderWithProvider(<LandingPage />)
-    expect(screen.getByText("PDF-kit")).toBeInTheDocument()
+    expect(screen.getByText("pdf-toc-tools")).toBeInTheDocument()
   })
 
   it("should display the subtitle", () => {
