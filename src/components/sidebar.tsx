@@ -378,7 +378,7 @@ function OutlineTreeNode({
     <div>
       <div
         className={cn(
-          "group flex cursor-pointer items-center gap-0.5 rounded-md py-1 pr-1 text-sm transition-colors",
+          "group flex min-w-0 cursor-pointer items-center gap-0.5 rounded-md py-1 pr-1 text-sm transition-colors",
           isActive ? "bg-primary/10 text-primary" : "hover:bg-muted"
         )}
         style={{ paddingLeft: `${depth * 12 + 4}px` }}
@@ -405,7 +405,9 @@ function OutlineTreeNode({
           /* Spacer for indentation of leaf nodes */
           <span className="inline-block w-4 shrink-0" />
         )}
-        <span className="min-w-0 flex-1 truncate">{node.title}</span>
+        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+          {node.title}
+        </span>
         <span
           className={cn(
             "shrink-0 text-[10px]",

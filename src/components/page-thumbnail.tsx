@@ -30,6 +30,9 @@ export const PageThumbnail = memo(function PageThumbnail({
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [renderStatus, setRenderStatus] = useState<"loading" | "ready" | "error">("loading")
+  const [containerWidth, setContainerWidth] = useState(width)
+
+  const renderWidth = Math.max(80, Math.min(width, containerWidth || width))
 
   useEffect(() => {
     const el = containerRef.current
@@ -48,26 +51,34 @@ export const PageThumbnail = memo(function PageThumbnail({
   }, [])
 
   useEffect(() => {
-    setRenderStatus("loading")
-  }, [pageNumber, width])
+    const el = containerRef.current
+    if (!el || typeof ResizeObserver === "undefined") return
+
+    const observer = new ResizeObserver(([entry]) => {
+      const nextWidth = Math.max(80, Math.floor(entry.contentRect.width))
+      setContainerWidth((prev) => (prev === nextWidth ? prev : nextWidth))
+    })
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        "group relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all",
+        "group relative w-full cursor-pointer overflow-hidden rounded-lg border-2 transition-all",
         selected
           ? "border-primary ring-primary/30 ring-2"
           : "border-transparent hover:border-muted-foreground/30"
       )}
       onClick={onClick}
-      style={{ width }}
     >
       {isVisible ? (
         <>
           <PdfPageCanvas
             pageNumber={pageNumber}
-            width={width}
+            width={renderWidth}
             onRenderStateChange={setRenderStatus}
           />
           {renderStatus !== "ready" && (
@@ -92,7 +103,7 @@ export const PageThumbnail = memo(function PageThumbnail({
       ) : (
         <div
           className="bg-muted animate-pulse"
-          style={{ width, aspectRatio: "3/4" }}
+          style={{ width: renderWidth, aspectRatio: "3/4" }}
         />
       )}
       {/* Selection checkbox (top-left) */}

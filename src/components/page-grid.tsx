@@ -27,7 +27,7 @@ export function PageGrid() {
     const all = activeFile.pageOrder.map((orig, idx) => ({
       originalPageIndex: orig,
       currentIndex: idx,
-      id: `page-${activeFile.id}-${idx}`,
+      id: `page-${activeFile.id}-${orig}`,
     }))
     if (!state.outlineFilter) return all
     const { startPage, endPage } = state.outlineFilter
@@ -43,6 +43,11 @@ export function PageGrid() {
   useEffect(() => {
     setItems(visiblePages.map((p) => p.id))
   }, [visiblePages])
+
+  const visiblePageMap = useMemo(
+    () => new Map(visiblePages.map((p) => [p.id, p])),
+    [visiblePages]
+  )
 
   const anchorRef = useRef<number | null>(null)
   const hasAnySelection = state.selectedPages.length > 0
@@ -185,8 +190,11 @@ export function PageGrid() {
       <div className="flex h-full flex-col">
         {/* Show indicator if filtering */}
         {state.outlineFilter && (
-          <div className="border-border flex items-center gap-2 border-b px-4 py-2">
-            <Badge variant="secondary" className="text-xs">
+          <div className="border-border flex min-w-0 items-center gap-2 border-b px-4 py-2">
+            <Badge
+              variant="secondary"
+              className="max-w-[55vw] min-w-0 truncate text-xs sm:max-w-none"
+            >
               {state.outlineFilter.label}
             </Badge>
             <span className="text-muted-foreground text-xs">
@@ -212,9 +220,7 @@ export function PageGrid() {
             setItems(updated)
 
             // Restore currentIndex from items ids and update pageOrder
-            const idToPage = new Map(
-              visiblePages.map((p) => [p.id, p])
-            )
+            const idToPage = visiblePageMap
             if (!state.outlineFilter) {
               // No filter: reorder all pages
               const newPageOrder = updated.map((id) => {
@@ -240,19 +246,25 @@ export function PageGrid() {
           <div className="relative flex-1 overflow-auto" ref={gridContainerRef}>
             <MarqueeOverlay rect={marqueeRect} />
             <div className="grid auto-rows-min grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2 p-2 sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] sm:gap-4 sm:p-4">
-              {visiblePages.map(({ originalPageIndex, currentIndex, id }, index) => (
-                <SortablePageThumbnail
-                  key={id}
-                  id={id}
-                  index={index}
-                  pageNumber={originalPageIndex + 1}
-                  displayIndex={currentIndex}
-                  selected={state.selectedPages.includes(currentIndex)}
-                  hasAnySelection={hasAnySelection}
-                  onClick={(e) => handlePageClick(currentIndex, e)}
-                  onToggleSelect={() => handleToggleSelect(currentIndex)}
-                />
-              ))}
+              {items
+                .map((id, index) => {
+                  const page = visiblePageMap.get(id)
+                  if (!page) return null
+                  return (
+                    <SortablePageThumbnail
+                      key={id}
+                      id={id}
+                      index={index}
+                      pageNumber={page.originalPageIndex + 1}
+                      displayIndex={page.currentIndex}
+                      selected={state.selectedPages.includes(page.currentIndex)}
+                      hasAnySelection={hasAnySelection}
+                      onClick={(e) => handlePageClick(page.currentIndex, e)}
+                      onToggleSelect={() => handleToggleSelect(page.currentIndex)}
+                    />
+                  )
+                })
+                .filter(Boolean)}
             </div>
           </div>
         </DragDropProvider>
@@ -336,7 +348,7 @@ function SortablePageThumbnail({
   const { ref } = useSortable({ id, index })
 
   return (
-    <div ref={ref} data-page-index={displayIndex}>
+    <div ref={ref} data-page-index={displayIndex} className="min-w-0">
       <PageThumbnail
         pageNumber={pageNumber}
         displayIndex={displayIndex}

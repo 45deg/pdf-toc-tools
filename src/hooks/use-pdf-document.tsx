@@ -180,7 +180,15 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
       }
       onRenderStateChange?.("ready")
     } catch (err) {
-      if ((err as { name?: string })?.name !== "RenderingCancelledException") {
+      const errorName = (err as { name?: string })?.name
+      if (errorName === "RenderingCancelledException" || errorName === "AbortException") {
+        const canvas = canvasRef.current
+        if (canvas && canvas.width > 0 && canvas.height > 0) {
+          onRenderStateChange?.("ready")
+        }
+        return
+      }
+      if (errorName !== "RenderingCancelledException") {
         onRenderStateChange?.("error")
       }
     }
