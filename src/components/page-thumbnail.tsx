@@ -29,6 +29,7 @@ export const PageThumbnail = memo(function PageThumbnail({
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [renderStatus, setRenderStatus] = useState<"loading" | "ready" | "error">("loading")
 
   useEffect(() => {
     const el = containerRef.current
@@ -46,6 +47,10 @@ export const PageThumbnail = memo(function PageThumbnail({
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    setRenderStatus("loading")
+  }, [pageNumber, width])
+
   return (
     <div
       ref={containerRef}
@@ -59,7 +64,31 @@ export const PageThumbnail = memo(function PageThumbnail({
       style={{ width }}
     >
       {isVisible ? (
-        <PdfPageCanvas pageNumber={pageNumber} width={width} />
+        <>
+          <PdfPageCanvas
+            pageNumber={pageNumber}
+            width={width}
+            onRenderStateChange={setRenderStatus}
+          />
+          {renderStatus !== "ready" && (
+            <div className="bg-background/70 absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
+              <div className="flex flex-col items-center gap-1.5">
+                {renderStatus === "error" ? (
+                  <span className="text-destructive text-[11px] font-medium">
+                    {t("thumbnail.loadError")}
+                  </span>
+                ) : (
+                  <>
+                    <div className="border-primary size-4 animate-spin rounded-full border-2 border-t-transparent" />
+                    <span className="text-muted-foreground text-[11px] font-medium">
+                      {t("thumbnail.loading")}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <div
           className="bg-muted animate-pulse"

@@ -41,6 +41,6 @@ describe("PdfToolkit", () => {
   it("renders LandingPage when no files are present", () => {
     renderWithProvider(<PdfToolkit />)
     // LandingPage is not mocked, so its content is displayed
-    expect(screen.getByText("landing.hero.title")).toBeInTheDocument()
+    expect(screen.getByText("PDF-kit")).toBeInTheDocument()
   })
 })

@@ -27,7 +27,6 @@
       "description": "タイトル・著者などのPDFメタデータを自由に変更"
     },
     "hero": {
-      "title": "PDF TOC Editor",
       "subtitle": "PDFの目次編集・ページ操作・分割結合をブラウザ上で完結"
     },
     "footer": {
@@ -74,7 +73,9 @@
     "processing": "処理中…"
   },
   "thumbnail": {
-    "ariaLabel": "ページ {{page}} を選択"
+    "ariaLabel": "ページ {{page}} を選択",
+    "loading": "サムネイル読み込み中…",
+    "loadError": "読み込み失敗"
   },
   "common": {
     "loading": "読み込み中...",
@@ -85,7 +86,9 @@
   "errors": {
     "notPdf": "PDFファイルではありません",
     "loadFailed": "ファイルを読み込めませんでした",
-    "loadFailedMany": "{{count}}件のファイルを読み込めませんでした"
+    "loadFailedMany": "{{count}}件のファイルを読み込めませんでした",
+    "downloadFailedTitle": "ダウンロードに失敗しました",
+    "downloadFailed": "ダウンロード処理中にエラーが発生しました"
   },
   "metadata": {
     "title": "メタデータ",
@@ -135,6 +138,7 @@
     "noOutline": "しおりがありません",
     "selectFile": "ファイルを選択してください",
     "downloadSection": "「{{title}}」をダウンロード",
+    "edited": "編集済み",
     "closeAria": "サイドバーを閉じる"
   }
 }

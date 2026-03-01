@@ -25,7 +25,7 @@ describe("Toolbar", () => {
   it("displays view mode toggle buttons", () => {
     renderWithProvider(<Toolbar />)
     expect(screen.getByText("toolbar.pages")).toBeInTheDocument()
-    expect(screen.getByText("toc.title")).toBeInTheDocument()
+    expect(screen.getByText("landing.tocEditor.title")).toBeInTheDocument()
     expect(screen.getByText("toolbar.split")).toBeInTheDocument()
     expect(screen.getByText("toolbar.metadata")).toBeInTheDocument()
   })
@@ -34,7 +34,7 @@ describe("Toolbar", () => {
     const user = userEvent.setup()
     renderWithProvider(<Toolbar />)
 
-    const tocButton = screen.getByText("toc.title")
+    const tocButton = screen.getByText("landing.tocEditor.title")
     await user.click(tocButton)
     // Verify TOC button has active style applied
     expect(tocButton.className).toContain("bg-background")

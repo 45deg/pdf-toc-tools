@@ -99,11 +99,13 @@ export function usePdfDocument() {
 export const PdfPageCanvas = memo(function PdfPageCanvas({
   pageNumber,
   width,
+  onRenderStateChange,
 }: {
   /** 1-indexed page number */
   pageNumber: number
   /** Display width (px) */
   width: number
+  onRenderStateChange?: (state: "loading" | "ready" | "error") => void
 }) {
   const pdfDoc = usePdfDocument()
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -120,6 +122,8 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
   const render = useCallback(async () => {
     if (!pdfDoc || !canvasRef.current) return
 
+    onRenderStateChange?.("loading")
+
     const fingerprint = pdfDoc.fingerprints?.[0] ?? ""
     const cacheKey = ThumbnailCacheKey(fingerprint, pageNumber, width)
 
@@ -135,6 +139,7 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
       setSize({ w: cached.width / dpr, h: cached.height / dpr })
       const ctx = canvas.getContext("2d")!
       ctx.drawImage(cached, 0, 0)
+      onRenderStateChange?.("ready")
       return
     }
 
@@ -173,10 +178,13 @@ export const PdfPageCanvas = memo(function PdfPageCanvas({
       } catch {
         // Ignore environments where createImageBitmap is not supported (works without cache)
       }
-    } catch {
-      // cancelled - ignore
+      onRenderStateChange?.("ready")
+    } catch (err) {
+      if ((err as { name?: string })?.name !== "RenderingCancelledException") {
+        onRenderStateChange?.("error")
+      }
     }
-  }, [pdfDoc, pageNumber, width])
+  }, [pdfDoc, pageNumber, width, onRenderStateChange])
 
   useEffect(() => {
     render()

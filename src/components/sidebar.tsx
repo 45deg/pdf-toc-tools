@@ -215,6 +215,7 @@ function FileList() {
               file={file}
               index={index}
               isActive={file.id === state.activeFileId}
+              isEdited={state.editedFileIds.includes(file.id)}
               onSelect={() => actions.setActiveFile(file.id)}
               onRemove={() => actions.removeFile(file.id)}
             />
@@ -229,15 +230,18 @@ function SortableFileItem({
   file,
   index,
   isActive,
+  isEdited,
   onSelect,
   onRemove,
 }: {
   file: LoadedPdf
   index: number
   isActive: boolean
+  isEdited: boolean
   onSelect: () => void
   onRemove: () => void
 }) {
+  const { t } = useTranslation()
   const { ref } = useSortable({ id: file.id, index })
 
   return (
@@ -261,6 +265,13 @@ function SortableFileItem({
         strokeWidth={2}
         className="text-muted-foreground size-3.5 shrink-0"
       />
+      {isEdited && (
+        <span
+          className="bg-primary inline-block size-1.5 shrink-0 rounded-full"
+          title={t("sidebar.edited")}
+          aria-label={t("sidebar.edited")}
+        />
+      )}
       <span className="min-w-0 flex-1 truncate">{file.name}</span>
       <span className="text-muted-foreground text-xs">
         {file.pageOrder.length}p

@@ -16,7 +16,7 @@ describe("App", () => {
   it("should render without crashing", () => {
     render(<App />)
     // LandingPage should be displayed (when no files are loaded)
-    expect(screen.getByText("landing.hero.title")).toBeInTheDocument()
+    expect(screen.getByText("PDF-kit")).toBeInTheDocument()
   })
 
   it("should be wrapped with PdfStoreProvider", () => {

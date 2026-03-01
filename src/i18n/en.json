@@ -27,7 +27,6 @@
       "description": "Freely modify PDF metadata such as title and author"
     },
     "hero": {
-      "title": "PDF TOC Editor",
       "subtitle": "Complete PDF bookmark editing, page operations, splitting, and merging entirely in your browser"
     },
     "dropzone": {
@@ -74,7 +73,9 @@
     "processing": "Processing..."
   },
   "thumbnail": {
-    "ariaLabel": "Select page {{page}}"
+    "ariaLabel": "Select page {{page}}",
+    "loading": "Loading thumbnail...",
+    "loadError": "Load failed"
   },
   "common": {
     "loading": "Loading...",
@@ -85,7 +86,9 @@
   "errors": {
     "notPdf": "Not a PDF file",
     "loadFailed": "Failed to load the file",
-    "loadFailedMany": "Failed to load {{count}} files"
+    "loadFailedMany": "Failed to load {{count}} files",
+    "downloadFailedTitle": "Download failed",
+    "downloadFailed": "An error occurred while preparing the download"
   },
   "metadata": {
     "title": "Metadata",
@@ -119,6 +122,7 @@
     "noOutline": "No bookmarks",
     "selectFile": "Select a file",
     "downloadSection": "Download '{{title}}'",
+    "edited": "Edited",
     "closeAria": "Close Sidebar"
   },
   "pageGrid": {

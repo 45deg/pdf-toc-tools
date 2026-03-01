@@ -11,8 +11,19 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { FileDropZone } from "@/components/file-drop-zone"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
+  AlertCircleIcon,
   DownloadIcon,
   LeftToRightListBulletIcon,
 } from "@hugeicons/core-free-icons"
@@ -26,6 +37,7 @@ export function Toolbar({ onToggleSidebar }: ToolbarProps) {
   const { state, actions } = usePdfStore()
   const activeFile = useActiveFile()
   const [isDownloading, setIsDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
 
   const viewModes: { mode: ViewMode; label: string }[] = useMemo(() => [
     { mode: "pages", label: t("toolbar.pages") },
@@ -57,6 +69,7 @@ export function Toolbar({ onToggleSidebar }: ToolbarProps) {
   // Download logic: extracted if selection exists, otherwise full file / merged
   const handleDownload = useCallback(async () => {
     if (state.files.length === 0) return
+    setDownloadError(null)
     setIsDownloading(true)
     try {
       if (hasSelection && activeFile) {
@@ -85,10 +98,16 @@ export function Toolbar({ onToggleSidebar }: ToolbarProps) {
         )
         downloadBlob(data, "merged.pdf")
       }
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : t("errors.downloadFailed")
+      setDownloadError(message)
     } finally {
       setIsDownloading(false)
     }
-  }, [state.files, hasSelection, activeFile, state.selectedPages])
+  }, [state.files, hasSelection, activeFile, state.selectedPages, t])
 
   return (
     <div className="border-border bg-background flex flex-col border-b">
@@ -152,6 +171,27 @@ export function Toolbar({ onToggleSidebar }: ToolbarProps) {
         {/* Add files */}
         <FileDropZone />
       </div>
+
+      <AlertDialog open={Boolean(downloadError)} onOpenChange={(open) => !open && setDownloadError(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10">
+              <HugeiconsIcon
+                icon={AlertCircleIcon}
+                strokeWidth={1.5}
+                className="size-5 text-destructive"
+              />
+            </AlertDialogMedia>
+            <AlertDialogTitle>{t("errors.downloadFailedTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{downloadError}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setDownloadError(null)}>
+              {t("common.close")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

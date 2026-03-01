@@ -32,6 +32,7 @@ interface PdfState {
   outlineFilter: OutlineFilter | null
   isLoading: boolean
   loadErrors: LoadError[]
+  editedFileIds: string[]
 }
 
 const initialState: PdfState = {
@@ -42,6 +43,7 @@ const initialState: PdfState = {
   outlineFilter: null,
   isLoading: false,
   loadErrors: [],
+  editedFileIds: [],
 }
 
 // ===== Actions =====
@@ -84,6 +86,7 @@ function reducer(state: PdfState, action: PdfAction): PdfState {
       return {
         ...state,
         files: newFiles,
+        editedFileIds: state.editedFileIds.filter((id) => id !== action.payload),
         activeFileId:
           state.activeFileId === action.payload
             ? (newFiles[0]?.id ?? null)
@@ -110,6 +113,9 @@ function reducer(state: PdfState, action: PdfAction): PdfState {
             ? { ...f, pageOrder: f.pageOrder.filter((_, i) => !toDelete.has(i)) }
             : f
         ),
+        editedFileIds: state.editedFileIds.includes(action.payload.fileId)
+          ? state.editedFileIds
+          : [...state.editedFileIds, action.payload.fileId],
         selectedPages: [],
       }
     }
@@ -122,6 +128,9 @@ function reducer(state: PdfState, action: PdfAction): PdfState {
             ? { ...f, pageOrder: action.payload.newOrder }
             : f
         ),
+        editedFileIds: state.editedFileIds.includes(action.payload.fileId)
+          ? state.editedFileIds
+          : [...state.editedFileIds, action.payload.fileId],
       }
 
     case "UPDATE_OUTLINE":
@@ -132,6 +141,9 @@ function reducer(state: PdfState, action: PdfAction): PdfState {
             ? { ...f, outline: action.payload.outline }
             : f
         ),
+        editedFileIds: state.editedFileIds.includes(action.payload.fileId)
+          ? state.editedFileIds
+          : [...state.editedFileIds, action.payload.fileId],
       }
 
     case "UPDATE_METADATA":
@@ -142,6 +154,9 @@ function reducer(state: PdfState, action: PdfAction): PdfState {
             ? { ...f, metadata: action.payload.metadata }
             : f
         ),
+        editedFileIds: state.editedFileIds.includes(action.payload.fileId)
+          ? state.editedFileIds
+          : [...state.editedFileIds, action.payload.fileId],
       }
 
     case "UPDATE_FILE_DATA":
@@ -152,6 +167,9 @@ function reducer(state: PdfState, action: PdfAction): PdfState {
             ? { ...f, data: action.payload.data }
             : f
         ),
+        editedFileIds: state.editedFileIds.includes(action.payload.fileId)
+          ? state.editedFileIds
+          : [...state.editedFileIds, action.payload.fileId],
       }
 
     case "REPLACE_FILE":
@@ -160,6 +178,9 @@ function reducer(state: PdfState, action: PdfAction): PdfState {
         files: state.files.map((f) =>
           f.id === action.payload.id ? action.payload : f
         ),
+        editedFileIds: state.editedFileIds.includes(action.payload.id)
+          ? state.editedFileIds
+          : [...state.editedFileIds, action.payload.id],
       }
 
     case "SET_OUTLINE_FILTER":
