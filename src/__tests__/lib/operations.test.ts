@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import { PDFDocument } from "pdf-lib"
 import {
   splitByPageRanges,
+  splitByOutline,
   createPdfWithPageOrder,
   updatePdfMetadata,
   applyOutlinesToPdf,
@@ -53,6 +54,38 @@ describe("splitByPageRanges", () => {
     const data = await createTestPdf(3)
     const results = await splitByPageRanges(data, [])
     expect(results).toEqual([])
+  })
+})
+
+describe("splitByOutline", () => {
+  it("uses Lv.1 as top-level", async () => {
+    const data = await createTestPdf(10)
+    const outline: OutlineNode[] = [
+      {
+        title: "Chapter 1",
+        pageIndex: 0,
+        children: [
+          { title: "Section 1.1", pageIndex: 0, children: [] },
+          { title: "Section 1.2", pageIndex: 3, children: [] },
+        ],
+      },
+      {
+        title: "Chapter 2",
+        pageIndex: 6,
+        children: [{ title: "Section 2.1", pageIndex: 6, children: [] }],
+      },
+    ]
+
+    const level1 = await splitByOutline(data, outline, 10, 1)
+    expect(level1).toHaveLength(2)
+    expect(level1[0].label).toBe("Chapter 1")
+    expect(level1[1].label).toBe("Chapter 2")
+
+    const level2 = await splitByOutline(data, outline, 10, 2)
+    expect(level2).toHaveLength(3)
+    expect(level2[0].label).toBe("Section 1.1")
+    expect(level2[1].label).toBe("Section 1.2")
+    expect(level2[2].label).toBe("Section 2.1")
   })
 })
 

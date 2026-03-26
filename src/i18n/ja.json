@@ -67,6 +67,11 @@
     "deselectAll": "すべて解除",
     "downloadLabel": "{{count}}セクションを分割してダウンロード",
     "noOutline": "このファイルにはしおりがありません。",
+    "options": {
+      "numberPrefix": "連番を付与（例: 01_タイトル）",
+      "folderHierarchy": "2階層以上はZIP内でフォルダ階層として出力",
+      "folderHierarchyHint": "フォルダ階層オプションは Lv.2 以上で利用できます。"
+    },
     "rangeLabel": "ページ範囲（例: 1-5, 10-15, 20）",
     "totalPages": "総ページ数: {{count}}",
     "download": "分割してダウンロード",

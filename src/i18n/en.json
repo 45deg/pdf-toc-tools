@@ -67,6 +67,11 @@
     "deselectAll": "Deselect All",
     "downloadLabel": "Split and Download {{count}} Sections",
     "noOutline": "This file has no bookmarks.",
+    "options": {
+      "numberPrefix": "Add numeric prefix (e.g. 01_title)",
+      "folderHierarchy": "Represent depth over 2 levels as folders in ZIP",
+      "folderHierarchyHint": "Folder hierarchy option is available from Lv.2."
+    },
     "rangeLabel": "Page Range (e.g., 1-5, 10-15, 20)",
     "totalPages": "Total Pages: {{count}}",
     "download": "Split and Download",

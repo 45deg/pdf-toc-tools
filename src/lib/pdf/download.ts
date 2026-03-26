@@ -34,7 +34,7 @@ export async function downloadSplitsAsZip(
 ) {
   const zip = new JSZip()
   for (const split of splits) {
-    zip.file(`${split.label}.pdf`, split.data)
+    zip.file(split.zipPath ?? `${split.label}.pdf`, split.data)
   }
   const blob = await zip.generateAsync({ type: "blob" })
   const url = URL.createObjectURL(blob)

@@ -33,6 +33,8 @@ export interface LoadedPdf {
 export interface SplitResult {
   label: string
   data: Uint8Array
+  /** Optional path in ZIP (e.g. folder/subfolder/file.pdf) */
+  zipPath?: string
 }
 
 /** View mode */

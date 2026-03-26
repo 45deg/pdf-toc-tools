@@ -6,6 +6,10 @@ import {
   splitByOutline,
   splitByPageRanges,
 } from "@/lib/pdf/operations"
+import {
+  buildSplitOutputPath,
+  getHierarchyDigitsByDepth,
+} from "@/lib/pdf/split-naming"
 import { downloadBlob, downloadSplitsAsZip } from "@/lib/pdf/download"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,14 +25,23 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 type SplitMode = "outline" | "pages"
+type TargetNodeInfo = {
+  title: string
+  node: OutlineNode
+  pathTitles: string[]
+  pathIndices: number[]
+  pathSiblingCounts: number[]
+}
 
 export function SplitPanel() {
   const { t } = useTranslation()
   const activeFile = useActiveFile()
   const [mode, setMode] = useState<SplitMode>("outline")
-  const [outlineLevel, setOutlineLevel] = useState(0)
+  const [outlineLevel, setOutlineLevel] = useState(1)
   const [pageRangesText, setPageRangesText] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
+  const [addNumberPrefix, setAddNumberPrefix] = useState(false)
+  const [useFolderHierarchy, setUseFolderHierarchy] = useState(false)
   // Sections to select via checkbox (for outline mode)
   const [selectedSections, setSelectedSections] = useState<Set<number>>(new Set())
 
@@ -44,13 +57,18 @@ export function SplitPanel() {
     return getDepth(activeFile.outline, 0)
   }, [activeFile])
 
-  // Get list of nodes at the specified level
-  const targetNodes = useMemo((): OutlineNode[] => {
+  // Get list of nodes at the specified level with ancestor path
+  const targetNodeInfos = useMemo((): TargetNodeInfo[] => {
     if (!activeFile || !hasOutline) return []
-    return outlineLevel === 0
-      ? activeFile.outline
-      : getNodesAtLevel(activeFile.outline, outlineLevel)
+    return getNodesWithPathAtLevel(activeFile.outline, outlineLevel)
   }, [activeFile, hasOutline, outlineLevel])
+
+  const targetNodes = useMemo(
+    () => targetNodeInfos.map((info) => info.node),
+    [targetNodeInfos]
+  )
+
+  const canUseFolderHierarchy = outlineLevel >= 2
 
   // For preview: page range for each node
   const sectionPreviews = useMemo(() => {
@@ -75,11 +93,9 @@ export function SplitPanel() {
   const handleLevelChange = useCallback(
     (level: number) => {
       setOutlineLevel(level)
+      if (level < 2) setUseFolderHierarchy(false)
       // Get nodes at the new level and select all
-      const nodes =
-        level === 0
-          ? (activeFile?.outline ?? [])
-          : getNodesAtLevel(activeFile?.outline ?? [], level)
+      const nodes = getNodesAtLevel(activeFile?.outline ?? [], level)
       setSelectedSections(new Set(nodes.map((_, i) => i)))
     },
     [activeFile]
@@ -123,8 +139,39 @@ export function SplitPanel() {
         activeFile.pageOrder.length,
         outlineLevel
       )
-      // Filter only selected sections
-      const splits = allSplits.filter((_, i) => selectedSections.has(i))
+
+      // Filter only selected sections and apply output naming options
+      const selectedEntries = allSplits
+        .map((split, index) => ({ split, index }))
+        .filter(({ index }) => selectedSections.has(index))
+      const hierarchyDigitsByDepth = getHierarchyDigitsByDepth(
+        targetNodeInfos.map((info) => ({
+          pathSiblingCounts: info.pathSiblingCounts,
+        }))
+      )
+
+      const splits = selectedEntries.map(({ split, index }, selectedOrder) => {
+        const info = targetNodeInfos[index]
+        const { label, zipPath } = buildSplitOutputPath({
+          info: info
+            ? {
+                title: info.title,
+                pathTitles: info.pathTitles,
+                pathIndices: info.pathIndices,
+                pathSiblingCounts: info.pathSiblingCounts,
+              }
+            : undefined,
+          fallbackLabel: split.label,
+          selectedOrder,
+          selectedCount: selectedEntries.length,
+          addNumberPrefix,
+          useFolderHierarchy,
+          canUseFolderHierarchy,
+          hierarchyDigitsByDepth,
+        })
+        return { ...split, label, zipPath }
+      })
+
       if (splits.length === 0) return
       if (splits.length === 1) {
         downloadBlob(splits[0].data, `${splits[0].label}.pdf`)
@@ -137,7 +184,15 @@ export function SplitPanel() {
     } finally {
       setIsProcessing(false)
     }
-  }, [activeFile, outlineLevel, selectedSections])
+  }, [
+    activeFile,
+    addNumberPrefix,
+    canUseFolderHierarchy,
+    outlineLevel,
+    selectedSections,
+    targetNodeInfos,
+    useFolderHierarchy,
+  ])
 
   const handleSplitByPages = useCallback(async () => {
     if (!activeFile) return
@@ -213,22 +268,56 @@ export function SplitPanel() {
                     {t("split.outlineLevel")}
                   </FieldLabel>
                   <div className="flex gap-1">
-                    {Array.from({ length: maxDepth + 1 }, (_, i) => (
+                    {Array.from({ length: maxDepth }, (_, i) => i + 1).map((level) => (
                       <button
-                        key={i}
+                        key={level}
                         className={cn(
                           "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                          outlineLevel === i
+                          outlineLevel === level
                             ? "bg-primary text-primary-foreground"
                             : "bg-muted text-muted-foreground hover:text-foreground"
                         )}
-                        onClick={() => handleLevelChange(i)}
+                        onClick={() => handleLevelChange(level)}
                       >
-                        Lv.{i}
+                        Lv.{level}
                       </button>
                     ))}
                   </div>
                 </Field>
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <label className="border-border hover:bg-muted/50 flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={addNumberPrefix}
+                      onChange={(e) => setAddNumberPrefix(e.target.checked)}
+                      className="accent-primary size-4 shrink-0 rounded"
+                    />
+                    <span>{t("split.options.numberPrefix")}</span>
+                  </label>
+                  <label
+                    className={cn(
+                      "border-border flex items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                      canUseFolderHierarchy
+                        ? "hover:bg-muted/50 cursor-pointer"
+                        : "text-muted-foreground cursor-not-allowed opacity-70"
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={useFolderHierarchy}
+                      onChange={(e) => setUseFolderHierarchy(e.target.checked)}
+                      disabled={!canUseFolderHierarchy}
+                      className="accent-primary size-4 shrink-0 rounded"
+                    />
+                    <span>{t("split.options.folderHierarchy")}</span>
+                  </label>
+                </div>
+                {!canUseFolderHierarchy && (
+                  <div className="text-muted-foreground text-xs">
+                    {t("split.options.folderHierarchyHint")}
+                  </div>
+                )}
 
                 {/* Preview list with checkboxes */}
                 {sectionPreviews.length > 0 && (
@@ -331,11 +420,42 @@ export function SplitPanel() {
 function getNodesAtLevel(
   nodes: OutlineNode[],
   targetLevel: number,
-  currentLevel: number = 0
+  currentLevel: number = 1
 ): OutlineNode[] {
   if (currentLevel === targetLevel) return nodes
   return nodes.flatMap((n) =>
     getNodesAtLevel(n.children, targetLevel, currentLevel + 1)
+  )
+}
+
+function getNodesWithPathAtLevel(
+  nodes: OutlineNode[],
+  targetLevel: number,
+  currentLevel: number = 1,
+  parentTitles: string[] = [],
+  parentIndices: number[] = [],
+  parentSiblingCounts: number[] = []
+): TargetNodeInfo[] {
+  if (currentLevel === targetLevel) {
+    const siblingCount = nodes.length
+    return nodes.map((node, index) => ({
+      title: node.title,
+      node,
+      pathTitles: [...parentTitles, node.title],
+      pathIndices: [...parentIndices, index],
+      pathSiblingCounts: [...parentSiblingCounts, siblingCount],
+    }))
+  }
+  const siblingCount = nodes.length
+  return nodes.flatMap((node, index) =>
+    getNodesWithPathAtLevel(
+      node.children,
+      targetLevel,
+      currentLevel + 1,
+      [...parentTitles, node.title],
+      [...parentIndices, index],
+      [...parentSiblingCounts, siblingCount]
+    )
   )
 }
 

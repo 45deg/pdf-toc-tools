@@ -30,11 +30,11 @@ export async function splitByOutline(
   data: ArrayBuffer,
   outline: OutlineNode[],
   totalPages: number,
-  level: number = 0
+  level: number = 1
 ): Promise<SplitResult[]> {
   if (outline.length === 0) return []
 
-  const targetNodes = level === 0 ? outline : getNodesAtLevel(outline, level)
+  const targetNodes = getNodesAtLevel(outline, level)
   if (targetNodes.length === 0) return []
 
   const ranges: { label: string; pages: number[] }[] = []
@@ -54,7 +54,7 @@ export async function splitByOutline(
 function getNodesAtLevel(
   nodes: OutlineNode[],
   targetLevel: number,
-  currentLevel: number = 0
+  currentLevel: number = 1
 ): OutlineNode[] {
   if (currentLevel === targetLevel) return nodes
   return nodes.flatMap((n) =>
