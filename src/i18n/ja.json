@@ -10,6 +10,21 @@
       "exportCsv": "CSVエクスポート",
       "exportMarkdown": "Markdownエクスポート",
       "import": "インポート",
+      "importStructure": "インポート構造",
+      "importStructureDialog": {
+        "title": "インポート構造",
+        "intro": "インポートできる形式は JSON と CSV です。JSON はエディタで直接編集する形式と同じで、CSV はインポート時に階層構造へ変換されます。",
+        "jsonHeading": "JSON形式",
+        "jsonDescription": "ルートは配列です。各項目は title、pageIndex、children を持ちます。pageIndex は0始まりのページ番号で、children は同じ構造の配列です。",
+        "jsonExampleLabel": "JSON例",
+        "csvHeading": "CSV形式",
+        "csvDescription": "列は level,title,page です。level は0始まりの階層、page は1始まりのページ番号です。タイトルにカンマや引用符を含む場合はダブルクォートで囲み、引用符は二重にします。",
+        "csvExampleLabel": "CSV例",
+        "promptHeading": "LLM向けプロンプト",
+        "promptDescription": "PDF本文や既存の目次テキストからしおりを作る場合は、次のプロンプトを使うとこのエディタへ貼り付けやすいJSONを得られます。",
+        "promptLabel": "プロンプト例",
+        "promptCode": "次のPDF本文または目次情報から、PDFしおり用のJSONだけを出力してください。\n\n出力形式:\n- ルートは配列\n- 各要素は { \"title\": string, \"pageIndex\": number, \"children\": OutlineNode[] }\n- pageIndex は0始まり。本文上のページ番号が1なら pageIndex は0\n- children は必ず配列。子がない場合は []\n- Markdownコードフェンス、説明文、コメントは出力しない\n- タイトルは原文の表記を保ち、不要な装飾やページ番号は含めない\n\n入力:\n[ここに目次または本文を貼る]"
+      },
       "apply": "適用",
       "reset": "リセット",
       "errorJson": "JSONの形式が正しくありません"
@@ -85,6 +100,8 @@
   "common": {
     "loading": "読み込み中...",
     "error": "エラーが発生しました",
+    "copy": "コピー",
+    "copied": "コピー済み",
     "close": "閉じる",
     "noFileSelected": "ファイルを選択してください"
   },

@@ -10,6 +10,21 @@
       "exportCsv": "Export CSV",
       "exportMarkdown": "Export Markdown",
       "import": "Import",
+      "importStructure": "Import Structure",
+      "importStructureDialog": {
+        "title": "Import Structure",
+        "intro": "You can import JSON or CSV. JSON matches the editor's native structure, while CSV is converted into a nested outline during import.",
+        "jsonHeading": "JSON format",
+        "jsonDescription": "The root value is an array. Each item has title, pageIndex, and children. pageIndex is zero-based, and children is an array with the same structure.",
+        "jsonExampleLabel": "JSON example",
+        "csvHeading": "CSV format",
+        "csvDescription": "Use the columns level,title,page. level is a zero-based hierarchy depth, and page is a one-based page number. Wrap titles containing commas or quotes in double quotes, and escape quotes by doubling them.",
+        "csvExampleLabel": "CSV example",
+        "promptHeading": "Prompt for LLMs",
+        "promptDescription": "When generating bookmarks from PDF text or an existing table of contents, this prompt helps produce JSON that can be pasted into the editor.",
+        "promptLabel": "Prompt example",
+        "promptCode": "From the following PDF text or table-of-contents information, output only JSON for PDF bookmarks.\n\nOutput format:\n- The root value is an array\n- Each item is { \"title\": string, \"pageIndex\": number, \"children\": OutlineNode[] }\n- pageIndex is zero-based. If the source page number is 1, pageIndex is 0\n- children is always an array. Use [] when there are no children\n- Do not output Markdown code fences, explanations, or comments\n- Preserve source titles, and do not include decorative numbering or page numbers in title\n\nInput:\n[paste the table of contents or source text here]"
+      },
       "apply": "Apply",
       "reset": "Reset",
       "errorJson": "Invalid JSON format"
@@ -85,6 +100,8 @@
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
+    "copy": "Copy",
+    "copied": "Copied",
     "close": "Close",
     "noFileSelected": "Select a file"
   },

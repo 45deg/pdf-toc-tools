@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { HelpCircleIcon } from "@hugeicons/core-free-icons"
 import { useActiveFile, usePdfStore } from "@/hooks/use-pdf-store"
 import {
   exportOutlineAsJson,
@@ -20,6 +22,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+const TOC_JSON_EXAMPLE = `[
+  {
+    "title": "Chapter 1",
+    "pageIndex": 0,
+    "children": [
+      {
+        "title": "Section 1.1",
+        "pageIndex": 2,
+        "children": []
+      }
+    ]
+  }
+]`
+
+const TOC_CSV_EXAMPLE = `level,title,page
+0,"Chapter 1",1
+1,"Section 1.1",3
+0,"Chapter 2",12`
 
 export function TocEditor() {
   const { t } = useTranslation()
@@ -178,6 +207,72 @@ export function TocEditor() {
               <Button variant="outline" size="sm" onClick={handleImport}>
                 {t("landing.tocEditor.import")}
               </Button>
+              <Dialog>
+                <DialogTrigger
+                  render={
+                    <Button
+                      variant="link"
+                      size="sm"
+                    />
+                  }
+                >
+                  {t("landing.tocEditor.importStructure")}
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <div className="bg-muted inline-flex size-10 items-center justify-center rounded-md">
+                      <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />
+                    </div>
+                    <DialogTitle>
+                      {t("landing.tocEditor.importStructureDialog.title")}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {t("landing.tocEditor.importStructureDialog.intro")}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="min-w-0 space-y-4 text-sm max-h-[50vh] overflow-y-auto ">
+                    <section className="min-w-0 space-y-2">
+                      <h3 className="text-foreground text-sm font-medium">
+                        {t("landing.tocEditor.importStructureDialog.jsonHeading")}
+                      </h3>
+                      <p className="text-muted-foreground text-wrap">
+                        {t("landing.tocEditor.importStructureDialog.jsonDescription")}
+                      </p>
+                      <CodeBlock
+                        label={t("landing.tocEditor.importStructureDialog.jsonExampleLabel")}
+                        code={TOC_JSON_EXAMPLE}
+                      />
+                    </section>
+
+                    <section className="min-w-0 space-y-2">
+                      <h3 className="text-foreground text-sm font-medium">
+                        {t("landing.tocEditor.importStructureDialog.csvHeading")}
+                      </h3>
+                      <p className="text-muted-foreground text-wrap">
+                        {t("landing.tocEditor.importStructureDialog.csvDescription")}
+                      </p>
+                      <CodeBlock
+                        label={t("landing.tocEditor.importStructureDialog.csvExampleLabel")}
+                        code={TOC_CSV_EXAMPLE}
+                      />
+                    </section>
+
+                    <section className="min-w-0 space-y-2">
+                      <h3 className="text-foreground text-sm font-medium">
+                        {t("landing.tocEditor.importStructureDialog.promptHeading")}
+                      </h3>
+                      <p className="text-muted-foreground text-wrap">
+                        {t("landing.tocEditor.importStructureDialog.promptDescription")}
+                      </p>
+                      <CodeBlock
+                        label={t("landing.tocEditor.importStructureDialog.promptLabel")}
+                        code={t("landing.tocEditor.importStructureDialog.promptCode")}
+                      />
+                    </section>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             {/* JSON Editor */}
@@ -210,5 +305,32 @@ export function TocEditor() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+function CodeBlock({ label, code }: { label: string; code: string }) {
+  const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(code)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1200)
+  }, [code])
+
+  return (
+    <figure className="min-w-0 space-y-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <figcaption className="text-muted-foreground text-xs font-medium">
+          {label}
+        </figcaption>
+        <Button variant="outline" size="xs" onClick={handleCopy}>
+          {copied ? t("common.copied") : t("common.copy")}
+        </Button>
+      </div>
+      <pre className="bg-muted/70 text-foreground max-w-full overflow-x-auto rounded-lg border px-3 py-2 text-xs leading-relaxed">
+        <code>{code}</code>
+      </pre>
+    </figure>
   )
 }
